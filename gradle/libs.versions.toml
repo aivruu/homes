@@ -1,0 +1,21 @@
+[versions]
+# Declare plugins/dependencies releases.
+paper = "1.20.4-R0.1-SNAPSHOT"
+
+configurate = "4.1.2"
+command = "2.0.0-SNAPSHOT"
+
+mongo = "4.11.0"
+
+shadow = "8.1.1"
+blossom = "1.2.0"
+
+[libraries]
+paper = { module = "io.papermc.paper:paper-api", version.ref = "paper" }
+configurate-gson = { module = "org.spongepowered:configurate-gson", version.ref = "configurate" }
+command = { module = "dev.triumphteam:triumph-cmd-bukkit", version.ref = "command" }
+mongo = { module = "org.mongodb:mongodb-driver-sync", version.ref = "mongo"}
+
+[plugins]
+shadow = { id = "com.github.johnrengelman.shadow", version.ref = "shadow" }
+blossom = { id = "net.kyori.blossom", version.ref = "blossom" }
