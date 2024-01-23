@@ -3,9 +3,9 @@ plugins {
 }
 
 dependencies {
-  compileOnlyApi(libs.paper)
-  compileOnlyApi(libs.configurate.gson)
-  compileOnlyApi(libs.mongo)
+  compileOnly(libs.paper)
+  compileOnly(libs.configurate.gson)
+  compileOnly(libs.mongo)
 }
 
 tasks {
