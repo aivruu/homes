@@ -1,0 +1,8 @@
+name: OwlHomes
+main: com.aivruu.homes.HomesPlugin
+loader: com.aivruu.homes.HomesPluginLoader
+authors: [ Qekly ]
+
+api-version: "1.20"
+version: ${version}
+description: Lightweight and efficient Paper plugin to create multiple homes.

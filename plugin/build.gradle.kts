@@ -7,9 +7,9 @@ plugins {
 val release = property("version") as String
 
 dependencies {
-  api(project(":api"))
-  compileOnlyApi(libs.paper)
-  compileOnlyApi(libs.command)
+  implementation(project(":api"))
+  compileOnly(libs.paper)
+  compileOnly(libs.command)
 }
 
 tasks {
