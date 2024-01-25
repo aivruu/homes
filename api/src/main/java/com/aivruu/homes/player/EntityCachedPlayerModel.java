@@ -1,12 +1,11 @@
 package com.aivruu.homes.player;
 
 import com.aivruu.homes.home.HomeAggregate;
-import com.aivruu.homes.home.ValueObjectHomePosition;
+import com.aivruu.homes.home.EntityHomeModel;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -16,9 +15,9 @@ import java.util.UUID;
  * @param name needed for this player.
  * @since 0.0.1
  */
-public record EntityCachedPlayerModel(@NotNull UUID id, @NotNull String name, @NotNull Map<@NotNull String, @NotNull ValueObjectHomePosition> homes) {
+public record EntityCachedPlayerModel(@NotNull UUID id, @NotNull String name, @NotNull EntityHomeModel[] homes) {
   public EntityCachedPlayerModel {
-    if (homes.keySet().size() > HomeAggregate.MAX_ALLOWED_HOMES_AMOUNT) {
+    if (homes.length > HomeAggregate.MAX_ALLOWED_HOMES_AMOUNT) {
       throw new IllegalArgumentException("Homes by player cannot be more than " + HomeAggregate.MAX_ALLOWED_HOMES_AMOUNT);
     }
   }
@@ -46,10 +45,10 @@ public record EntityCachedPlayerModel(@NotNull UUID id, @NotNull String name, @N
   /**
    * Returns all the homes for this entity/player.
    *
-   * @return A {@link Map}.
+   * @return A {@link EntityHomeModel} array.
    * @since 0.0.1
    */
-  public @NotNull Map<@NotNull String, @NotNull ValueObjectHomePosition> homes() {
+  public @NotNull EntityHomeModel[] homes() {
     return this.homes;
   }
 
