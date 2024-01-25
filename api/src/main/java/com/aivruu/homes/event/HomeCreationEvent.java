@@ -1,6 +1,6 @@
 package com.aivruu.homes.event;
 
-import com.aivruu.homes.home.ValueObjectHomePosition;
+import com.aivruu.homes.home.EntityHomeModel;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
@@ -16,13 +16,13 @@ public class HomeCreationEvent extends Event implements Cancellable {
   private static final HandlerList HANDLER_LIST = new HandlerList();
   private final Player player;
   private final String homeId;
-  private final ValueObjectHomePosition valueObjectHomePosition;
+  private final EntityHomeModel entityHomeModel;
   private boolean cancelled;
 
-  public HomeCreationEvent(final @NotNull Player player, final @NotNull String homeId, final @NotNull ValueObjectHomePosition valueObjectHomePosition) {
+  public HomeCreationEvent(final @NotNull Player player, final @NotNull String homeId, final @NotNull EntityHomeModel entityHomeModel) {
     this.player = player;
     this.homeId = homeId;
-    this.valueObjectHomePosition = valueObjectHomePosition;
+    this.entityHomeModel = entityHomeModel;
   }
 
   /**
@@ -46,13 +46,13 @@ public class HomeCreationEvent extends Event implements Cancellable {
   }
 
   /**
-   * Returns the {@link ValueObjectHomePosition} for the home location.
+   * Returns the {@link EntityHomeModel} for the home location.
    *
-   * @return The {@link ValueObjectHomePosition}.
+   * @return The {@link EntityHomeModel}.
    * @since 0.0.1
    */
-  public @NotNull ValueObjectHomePosition homePosition() {
-    return this.valueObjectHomePosition;
+  public @NotNull EntityHomeModel homePosition() {
+    return this.entityHomeModel;
   }
 
   @Override
