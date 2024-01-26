@@ -1,11 +1,12 @@
 package com.aivruu.homes.teleport;
 
-import com.aivruu.homes.home.ValueObjectHomePosition;
+import com.aivruu.homes.home.EntityHomeModel;
+import com.aivruu.homes.home.HomeAggregate;
 import com.aivruu.homes.result.ValueObjectHomeResult;
-import com.aivruu.homes.player.EntityCachedPlayerModel;
-import com.aivruu.homes.repository.PlayerModelRepository;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.UUID;
 
 /**
  * This class manage the homes teleport operations for the player.
@@ -13,44 +14,34 @@ import org.jetbrains.annotations.NotNull;
  * @since 0.0.1
  */
 public class HomeTeleportManager {
-  private static HomeTeleportManager instance;
-  private final PlayerModelRepository repository;
+  private final HomeAggregate aggregate;
 
-  private HomeTeleportManager(final @NotNull PlayerModelRepository repository) {
-    this.repository = repository;
+  public HomeTeleportManager(final @NotNull HomeAggregate aggregate) {
+    this.aggregate = aggregate;
   }
 
   /**
-   * Returns a reference of {@link HomeTeleportManager}.
-   *
-   * @return A reference of {@link HomeTeleportManager}.
-   * @since 0.0.1
-   */
-   public static @NotNull HomeTeleportManager get() {
-    if (instance == null) {
-      instance = new HomeTeleportManager(PlayerModelRepository.get());
-    }
-    return instance;
-  }
-
-  /**
-   * Teleports the player to the home expected.
-   *
-   * @param player needed to perform teleport.
-   * @param homeId home id expected to be teleported.
-   * @return A status boolean expected devolved by {@link ValueObjectHomeResult#withStatus(Object, byte)},
-   * @see ValueObjectHomePosition#performTeleportAsync(Player)
+   * Performs the teleport of the player to the home specified.
+   * 
+   * @param player needed to find home and perform teleportation.
+   * @param homeId identifier needed to find the home.
+   * @return A boolean status expected by {@link ValueObjectHomeResult}, possible status devolved.<p>
+   * <p>
+   * • {@code true} if status code returned by {@link EntityHomeModel#performTeleportAsync(Player)}
+   * is -5 (teleport successful).<p>
+   * • {@code false} if the status code returned by {@link HomeAggregate#performHomeSearch(UUID, String)}
+   * is -6 (home not found).
+   * @see HomeAggregate#performHomeSearch(UUID, String)
+   * @see EntityHomeModel#performTeleportAsync(Player)
    * @since 0.0.1
    */
   public boolean performTeleport(final @NotNull Player player, final @NotNull String homeId) {
-    final EntityCachedPlayerModel playerModelEntity = this.repository.findOne(player.getUniqueId());
-    if (playerModelEntity == null) {
+    final ValueObjectHomeResult<EntityHomeModel> homeResult = this.aggregate.performHomeSearch(player.getUniqueId(), homeId);
+    if (homeResult.statusIs((byte) -6)) {
       return false;
     }
-    final ValueObjectHomePosition valueObjectHomePosition = playerModelEntity.homes().get(homeId);
-    if (valueObjectHomePosition == null) {
-      return false;
-    }
-    return valueObjectHomePosition.performTeleportAsync(player).statusIs((byte) -5);
+    final EntityHomeModel entityHomeModel = homeResult.result();
+    assert entityHomeModel != null;
+    return entityHomeModel.performTeleportAsync(player).statusIs((byte) -5);
   }
 }
