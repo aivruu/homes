@@ -1,5 +1,6 @@
 package com.aivruu.homes.result;
 
+import com.aivruu.homes.home.EntityHomeModel;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -34,14 +35,14 @@ public record ValueObjectHomeResult<T>(@Nullable T result, byte status) {
   public static final byte ERROR_RESULT = 2;
 
   /**
-   * Creates a new {@link ValueObjectHomeResult} that represents an added.
+   * Creates a new {@link ValueObjectHomeResult} with a {@link EntityHomeModel}.
    *
-   * @return A {@link ValueObjectHomeResult} with the status {@link ValueObjectHomeResult#ADDED_RESULT}.
-   * @param <T> object for this result.
+   * @return A {@link ValueObjectHomeResult} with the status {@link ValueObjectHomeResult#ADDED_RESULT}
+   * and a {@link EntityHomeModel} that represents the home created and added.
    * @since 0.0.1
    */
-  public static <T> @NotNull ValueObjectHomeResult<@Nullable T> withAdded() {
-    return new ValueObjectHomeResult<>(null, ADDED_RESULT);
+  public static @NotNull ValueObjectHomeResult<@NotNull EntityHomeModel> withAdded(final @NotNull EntityHomeModel entityHomeModel) {
+    return new ValueObjectHomeResult<>(entityHomeModel, ADDED_RESULT);
   }
 
   /**
