@@ -1,22 +1,22 @@
 package com.aivruu.homes.service;
 
-import com.aivruu.homes.config.model.BaseConfigModel;
 import org.jetbrains.annotations.NotNull;
+import com.aivruu.homes.config.model.BaseConfigModel;
 
 import java.util.List;
 
 /**
  * A simple implementation of {@link ServiceModel}
- * that provide a {@link BaseConfigModel} type list return method.
+ * that provide a generics types list return method.
  *
  * @since 0.0.1
  */
 public interface ConfigServiceModelImpl extends ServiceModel<BaseConfigModel> {
   /**
-   * Returns a list with {@link BaseConfigModel} references for this service implementation.
+   * Returns a list with generic types references for this service implementation.
    *
-   * @return A {@link List} with {@link BaseConfigModel} references used in this service model implementation.
+   * @return A {@link List} with generic types (most common, configuration models) references used in this service model implementation.
    * @since 0.0.1
    */
-  @NotNull List<? extends BaseConfigModel> getConfigurationModels();
+  @NotNull List<@NotNull BaseConfigModel> getConfigurationModels();
 }
