@@ -18,9 +18,8 @@ public class ServiceManager {
   private final Logger logger;
   private List<ServiceModel<?>> services;
 
-  public ServiceManager(final @NotNull Logger logger, final ServiceModel<?>@NotNull... services) {
+  public ServiceManager(final @NotNull Logger logger, final ServiceModel<?> @NotNull... services) {
     this.logger = logger;
-    Arrays.sort(services);
     this.services = new ArrayList<>(Arrays.asList(services));
   }
 
@@ -37,9 +36,6 @@ public class ServiceManager {
     return CompletableFuture.supplyAsync(() -> {
       byte index = 0;
       for (final ServiceModel<?> serviceModel : this.services) {
-        if (serviceModel.isOk()) {
-          continue;
-        }
         final String serviceId = serviceModel.id();
         if (!serviceModel.start()) {
           this.logger.error("The service %s has could not start correctly.".formatted(serviceId));
@@ -48,9 +44,9 @@ public class ServiceManager {
         }
         index++;
         serviceModel.setOk(true);
-        this.logger.info("The service %s has been started.".formatted(serviceModel));
+        this.logger.info("The service %s has been started.".formatted(serviceId));
       }
-      return index == this.services.size();
+      return index == this.services.size() - 1;
     });
   }
 
