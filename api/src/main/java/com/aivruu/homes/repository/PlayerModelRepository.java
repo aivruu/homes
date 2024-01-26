@@ -15,24 +15,10 @@ import java.util.concurrent.ConcurrentHashMap;
  * @since 0.0.1
  */
 public class PlayerModelRepository {
-  private static PlayerModelRepository instance;
   private final Map<UUID, EntityCachedPlayerModel> players;
 
-  private PlayerModelRepository() {
+  public PlayerModelRepository() {
     this.players = new ConcurrentHashMap<>();
-  }
-
-  /**
-   * Returns a reference of {@link PlayerModelRepository}.
-   *
-   * @return A reference of {@link PlayerModelRepository}.
-   * @since 0.0.1
-   */
-  public static @NotNull PlayerModelRepository get() {
-    if (instance == null) {
-      instance = new PlayerModelRepository();
-    }
-    return instance;
   }
 
   /**
