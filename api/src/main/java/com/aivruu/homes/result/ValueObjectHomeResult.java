@@ -20,51 +20,63 @@ public record ValueObjectHomeResult<T>(@Nullable T result, byte status) {
    *
    * @since 0.0.1
    */
-  public static final byte ADDED_RESULT = 0;
+  public static final byte ADDED_STATUS = 0;
   /**
    * The deletion was performed.
    *
    * @since 0.0.1
    */
-  public static final byte REMOVED_RESULT = 1;
+  public static final byte REMOVED_STATUS = 1;
   /**
-   * Something went wrong during the operation.
+   * The model was founded correctly.
    *
    * @since 0.0.1
    */
-  public static final byte ERROR_RESULT = 2;
+  public static final byte FOUNDED_STATUS = 2;
+  public static final byte ERROR_STATUS = 3;
 
   /**
    * Creates a new {@link ValueObjectHomeResult} with a {@link EntityHomeModel}.
    *
-   * @return A {@link ValueObjectHomeResult} with the status {@link ValueObjectHomeResult#ADDED_RESULT}
+   * @return A {@link ValueObjectHomeResult} with the status {@link ValueObjectHomeResult#ADDED_STATUS}
    * and a {@link EntityHomeModel} that represents the home created and added.
    * @since 0.0.1
    */
   public static @NotNull ValueObjectHomeResult<@NotNull EntityHomeModel> withAdded(final @NotNull EntityHomeModel entityHomeModel) {
-    return new ValueObjectHomeResult<>(entityHomeModel, ADDED_RESULT);
+    return new ValueObjectHomeResult<>(entityHomeModel, ADDED_STATUS);
   }
 
   /**
    * Creates a new {@link ValueObjectHomeResult} that represents a removed.
    *
-   * @return A {@link ValueObjectHomeResult} with the status {@link ValueObjectHomeResult#REMOVED_RESULT}.
+   * @return A {@link ValueObjectHomeResult} with the status {@link ValueObjectHomeResult#REMOVED_STATUS}.
    * @param <T> object for this result.
    * @since 0.0.1
    */
   public static <T> @NotNull ValueObjectHomeResult<@Nullable T> withRemoved() {
-    return new ValueObjectHomeResult<>(null, REMOVED_RESULT);
+    return new ValueObjectHomeResult<>(null, REMOVED_STATUS);
+  }
+
+  /**
+   * Creates a new {@link ValueObjectHomeResult} that represents the 'founded' status.
+   *
+   * @param entityHomeModel needed to return as a result for this operation.
+   * @return A {@link EntityHomeModel} as result.
+   * @since 0.0.1
+   */
+  public static @NotNull ValueObjectHomeResult<@NotNull EntityHomeModel> withFounded(final @NotNull EntityHomeModel entityHomeModel) {
+    return new ValueObjectHomeResult<>(entityHomeModel, FOUNDED_STATUS);
   }
 
   /**
    * Creates a new {@link ValueObjectHomeResult} that represents an error.
    *
-   * @return A {@link ValueObjectHomeResult} with the status {@link ValueObjectHomeResult#ERROR_RESULT}.
+   * @return A {@link ValueObjectHomeResult} with the status {@link ValueObjectHomeResult#ERROR_STATUS}.
    * @param <T> object for this result.
    * @since 0.0.1
    */
   public static <T> @NotNull ValueObjectHomeResult<@Nullable T> withError() {
-    return new ValueObjectHomeResult<>(null, ERROR_RESULT);
+    return new ValueObjectHomeResult<>(null, ERROR_STATUS);
   }
 
   /**
@@ -87,7 +99,7 @@ public record ValueObjectHomeResult<T>(@Nullable T result, byte status) {
    * @since 0.0.1
    */
   public boolean added() {
-    return this.status == ADDED_RESULT;
+    return this.status == ADDED_STATUS;
   }
 
   /**
@@ -97,7 +109,17 @@ public record ValueObjectHomeResult<T>(@Nullable T result, byte status) {
    * @since 0.0.1
    */
   public boolean removed() {
-    return this.status == REMOVED_RESULT;
+    return this.status == REMOVED_STATUS;
+  }
+
+  /**
+   * Returns whether the home model was founded.
+   *
+   * @return whether the home model was founded.
+   * @since 0.0.1
+   */
+  public boolean founded() {
+    return this.status == FOUNDED_STATUS;
   }
 
   /**
@@ -107,7 +129,7 @@ public record ValueObjectHomeResult<T>(@Nullable T result, byte status) {
    * @since 0.0.1
    */
   public boolean error() {
-    return this.status == ERROR_RESULT;
+    return this.status == ERROR_STATUS;
   }
 
   /**
