@@ -13,12 +13,12 @@ import org.jetbrains.annotations.NotNull;
  *
  * @since 0.0.1
  */
-@SuppressWarnings("UnstableApiUsage")
+@SuppressWarnings({"unused", "UnstableApiUsage"})
 public class HomesPluginLoader implements PluginLoader {
   @Override
   public void classloader(final @NotNull PluginClasspathBuilder pluginClasspathBuilder) {
     final MavenLibraryResolver libraryResolver = new MavenLibraryResolver();
-    libraryResolver.addRepository(new RemoteRepository.Builder("central", "default", "https://repo1.maven.central/repository/").build());
+    libraryResolver.addRepository(new RemoteRepository.Builder("central", "default", "https://repo1.maven.org/maven2/").build());
     libraryResolver.addRepository(new RemoteRepository.Builder("triumphteam", "default", "https://repo.triumphteam.dev/snapshots/").build());
     libraryResolver.addDependency(new Dependency(new DefaultArtifact("dev.triumphteam:triumph-cmd-bukkit:2.0.0-SNAPSHOT"), null));
     libraryResolver.addDependency(new Dependency(new DefaultArtifact("org.spongepowered:configurate-gson:4.1.2"), null));
