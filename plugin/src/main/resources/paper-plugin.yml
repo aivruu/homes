@@ -1,4 +1,4 @@
-name: OwlHomes
+name: Homes
 main: com.aivruu.homes.HomesPlugin
 loader: com.aivruu.homes.HomesPluginLoader
 authors: [ Qekly ]
