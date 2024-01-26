@@ -5,7 +5,6 @@ import com.aivruu.homes.result.ValueObjectDataResult;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -49,13 +48,4 @@ public interface DataModel {
    * @since 0.0.1
    */
   @NotNull CompletableFuture<@NotNull ValueObjectDataResult<@Nullable EntityCachedPlayerModel>> performAsyncRead(final @NotNull String id);
-
-  /**
-   * Reads and create new {@link EntityCachedPlayerModel}'s since data from storage.
-   *
-   * @return A {@link CompletableFuture} that could provide a {@link ValueObjectDataResult} with an
-   * expected status code for this operation, possible status codes.
-   * @since 0.0.1
-   */
-  @NotNull CompletableFuture<@NotNull ValueObjectDataResult<@Nullable List<@NotNull EntityCachedPlayerModel>>> performAsyncCollectionRead();
 }
