@@ -34,8 +34,8 @@ public final class HomesPlugin extends JavaPlugin implements Homes {
   public void onLoad() {
     Provider.load(this);
     this.logger = getComponentLogger();
-    this.logger.info(ComponentUtils.parse("<green>Prepare plugin internal components, loading service models."));
-    this.logger.info(ComponentUtils.parse("<yellow>Loading service manager."));
+    this.logger.info(ComponentUtils.parse("<green>Prepare plugin internal components."));
+    this.logger.info(ComponentUtils.parse("<yellow>Loading configuration models."));
     final Path pluginFolder = this.getDataFolder().toPath();
     final ValueObjectConfigResult<ConfigModel> configStatus = ValueObjectConfigManager.INSTANCE.loadConfig(pluginFolder);
     final ValueObjectConfigResult<MessageConfigModel> messageStatus = ValueObjectConfigManager.INSTANCE.loadMessages(pluginFolder);
@@ -49,12 +49,14 @@ public final class HomesPlugin extends JavaPlugin implements Homes {
     this.repository = new PlayerModelRepository();
     this.homeAggregate = new HomeAggregate(this.repository);
     this.homeTeleportManager = new HomeTeleportManager(this.homeAggregate);
-    if (!this.config.dataFormat.equals("JSON")) {
+    if (this.config.dataFormat.equals("JSON")) {
       this.data = new JsonModelData(this.getDataFolder(), this.config);
+      this.logger.info(ComponentUtils.parse("<green>JSON storage initialized."));
     } else if (this.config.dataFormat.equals("MONGODB")) {
       this.data = new MongoDBModelData();
+      this.logger.info(ComponentUtils.parse("<green>MongoDB storage initialized."));
     } else {
-      this.logger.error(ComponentUtils.parse("<red>Unknown storage type detected in configuration. Illegal type <data-type>", Placeholder.parsed("data-type", this.config.dataFormat)));
+      this.logger.error(ComponentUtils.parse("<red>Unknown storage type detected in configuration. Illegal type '<data-type>'", Placeholder.parsed("data-type", this.config.dataFormat)));
       this.setEnabled(false);
     }
   }
