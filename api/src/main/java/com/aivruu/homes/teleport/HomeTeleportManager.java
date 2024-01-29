@@ -35,13 +35,13 @@ public class HomeTeleportManager {
    * @see EntityHomeModel#performTeleportAsync(Player)
    * @since 0.0.1
    */
-  public boolean performTeleport(final @NotNull Player player, final @NotNull String homeId) {
+  public byte performTeleport(final @NotNull Player player, final @NotNull String homeId) {
     final ValueObjectHomeResult<EntityHomeModel> homeResult = this.aggregate.performHomeSearch(player.getUniqueId(), homeId);
-    if (homeResult.statusIs((byte) -6)) {
-      return false;
+    if (homeResult.statusIs((byte) -50)) {
+      return -50;
     }
     final EntityHomeModel entityHomeModel = homeResult.result();
     assert entityHomeModel != null;
-    return entityHomeModel.performTeleportAsync(player).statusIs((byte) -5);
+    return entityHomeModel.performTeleportAsync(player).status();
   }
 }
