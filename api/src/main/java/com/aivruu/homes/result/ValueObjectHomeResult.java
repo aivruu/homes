@@ -6,8 +6,6 @@ import org.jetbrains.annotations.Nullable;
 
 /**
  * Represents the result of an operation performed on a home.
- * <p>
- * NOTE: If you want to return a custom status use values between -128 and -1.
  *
  * @param result the result of the operation.
  * @param status the status of the operation.
@@ -33,7 +31,18 @@ public record ValueObjectHomeResult<T>(@Nullable T result, byte status) {
    * @since 0.0.1
    */
   public static final byte FOUNDED_STATUS = 2;
-  public static final byte ERROR_STATUS = 3;
+  /**
+   * The array was cleared correctly.
+   *
+   * @since 0.0.1
+   */
+  public static final byte CLEAN_STATUS = 3;
+  /**
+   * Something went wrong during the operation.
+   *
+   * @since 0.0.1
+   */
+  public static final byte ERROR_STATUS = 4;
 
   /**
    * Creates a new {@link ValueObjectHomeResult} with a {@link EntityHomeModel}.
@@ -69,6 +78,17 @@ public record ValueObjectHomeResult<T>(@Nullable T result, byte status) {
   }
 
   /**
+   * Creates a new {@link ValueObjectHomeResult} that represents the 'clean' status.
+   *
+   * @param cleanedArrayLengthAsByte the cleaned array length as a {@code byte} type reference.
+   * @return A {@code byte} value as result.
+   * @since 0.0.1
+   */
+  public static @NotNull ValueObjectHomeResult<@Nullable Byte> withClean(final byte cleanedArrayLengthAsByte) {
+    return new ValueObjectHomeResult<>(cleanedArrayLengthAsByte, CLEAN_STATUS);
+  }
+
+  /**
    * Creates a new {@link ValueObjectHomeResult} that represents an error.
    *
    * @return A {@link ValueObjectHomeResult} with the status {@link ValueObjectHomeResult#ERROR_STATUS}.
@@ -78,6 +98,7 @@ public record ValueObjectHomeResult<T>(@Nullable T result, byte status) {
   public static <T> @NotNull ValueObjectHomeResult<@Nullable T> withError() {
     return new ValueObjectHomeResult<>(null, ERROR_STATUS);
   }
+
 
   /**
    * Creates a new {@link ValueObjectHomeResult} that represents the status specified.
