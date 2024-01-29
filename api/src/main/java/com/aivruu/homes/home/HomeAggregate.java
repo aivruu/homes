@@ -34,8 +34,7 @@ public class HomeAggregate {
    * @param homeId identifier needed for new home data.
    * @return A status code of {@link ValueObjectHomeResult}, possible status code returned.<p>
    * <p>
-   * • {@link ValueObjectHomeResult#withStatus(Object, byte)} with the {@link EntityHomeModel}
-   * and status code {@link ValueObjectHomeResult#ADDED_STATUS} for this home if was created correctly.<p>
+   * • {@link ValueObjectHomeResult#withAdded(EntityHomeModel)} for this home if was created correctly.<p>
    * • {@link ValueObjectHomeResult#withStatus(Object, byte)} with the status code -4 if {@link HomeCreationEvent} instance is cancelled.<p>
    * • {@link ValueObjectHomeResult#withStatus(Object, byte)} with the status code -10 if already exists a home with the same id that was given.<p>
    * • {@link ValueObjectHomeResult#withError()} if player information was not founded.
@@ -77,12 +76,15 @@ public class HomeAggregate {
    * • {@link ValueObjectHomeResult#withError()} if player information was not founded.
    * @since 0.0.1
    */
-  public @NotNull ValueObjectHomeResult<@Nullable EntityHomeModel> performHomeDeletion(final @NotNull UUID id, final @NotNull String homeId) {
+  public @NotNull ValueObjectHomeResult<?> performHomeDeletion(final @NotNull UUID id, final @NotNull String homeId) {
     final EntityCachedPlayerModel playerModel = this.repository.remove(id);
     if (playerModel == null) {
       return ValueObjectHomeResult.withError();
     }
     final EntityHomeModel[] playerHomes = playerModel.homes();
+    if (playerHomes.length - 1 == 0) {
+      return ValueObjectHomeResult.withStatus(null, (byte) -15);
+    }
     boolean founded = false;
     for (int i = 0 ; i < playerHomes.length ; i++) {
       if (!playerHomes[i].id().equals(homeId)) {
@@ -107,13 +109,13 @@ public class HomeAggregate {
    * @param id needed to identify to player data model.
    * @return A status code of {@link ValueObjectHomeResult} for this operation, expected status codes.<p>
    * <p>
-   * • {@link ValueObjectHomeResult#withRemoved()} if the homes were deleted correctly.<p>
+   * • {@link ValueObjectHomeResult#withClean(byte)} if the homes were deleted correctly.<p>
    * • {@link ValueObjectHomeResult#withStatus(Object, byte)} with the status code -4 if a {@link HomesCleanEvent}
    * instance has been cancelled during the operation.<p>
    * • {@link ValueObjectHomeResult#withError()} if player information was not found.
    * @since 0.0.1
    */
-  public @NotNull ValueObjectHomeResult<@Nullable EntityHomeModel> performAllHomesClean(final @NotNull UUID id) {
+  public @NotNull ValueObjectHomeResult<@Nullable Byte> performAllHomesClean(final @NotNull UUID id) {
     final EntityCachedPlayerModel playerModel = this.repository.remove(id);
     if (playerModel == null) {
       return ValueObjectHomeResult.withError();
@@ -125,7 +127,7 @@ public class HomeAggregate {
       return ValueObjectHomeResult.withStatus(null, (byte) -4);
     }
     this.repository.add(new EntityCachedPlayerModel(id, playerModel.name(), newEmptyHomesArray));
-    return ValueObjectHomeResult.withRemoved();
+    return ValueObjectHomeResult.withClean((byte) playerModel.homes().length);
   }
 
   /**
@@ -155,7 +157,25 @@ public class HomeAggregate {
       break;
     }
     return (entityHomeModel == null)
-      ? ValueObjectHomeResult.withStatus(null, (byte) -6)
+      ? ValueObjectHomeResult.withStatus(null, (byte) -100)
       : ValueObjectHomeResult.withFounded(entityHomeModel);
+  }
+
+  /**
+   * Returns the homes array for the specified player.
+   *
+   * @param id needed to identify the player data model.
+   * @return A status code of {@link ValueObjectHomeResult}, possible status codes.<p>
+   * <p>
+   * • {@link ValueObjectHomeResult#withStatus(Object, byte)} with the {@link EntityHomeModel} array for the player and the status code -150.<p>
+   * • {@link ValueObjectHomeResult#withError()} if player information was not founded.
+   * @since 0.0.1
+   */
+  public @NotNull ValueObjectHomeResult<@Nullable EntityHomeModel[]> performPlayerHomesList(final @NotNull UUID id) {
+    final EntityCachedPlayerModel playerModel = this.repository.findOne(id);
+    if (playerModel == null) {
+      return ValueObjectHomeResult.withError();
+    }
+    return ValueObjectHomeResult.withStatus(playerModel.homes(), (byte) -150);
   }
 }
