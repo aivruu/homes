@@ -22,17 +22,12 @@ public class MongoDBModelData implements DataModel {
   }
 
   @Override
-  public @NotNull CompletableFuture<@NotNull ValueObjectDataResult<@Nullable List<@NotNull EntityCachedPlayerModel>>> performAsyncCollectionWrite(final @NotNull Collection<@NotNull EntityCachedPlayerModel> modelsCollection) {
-    return null;
-  }
-
-  @Override
   public @NotNull CompletableFuture<@NotNull ValueObjectDataResult<@Nullable EntityCachedPlayerModel>> performAsyncWrite(final @NotNull EntityCachedPlayerModel playerModel) {
     return null;
   }
 
   @Override
-  public @NotNull CompletableFuture<@NotNull ValueObjectDataResult<@Nullable EntityCachedPlayerModel>> performAsyncRead(final @NotNull String id) {
+  public @NotNull CompletableFuture<@NotNull ValueObjectDataResult<@Nullable EntityCachedPlayerModel>> performAsyncRead(final @NotNull String name) {
     return null;
   }
 }
