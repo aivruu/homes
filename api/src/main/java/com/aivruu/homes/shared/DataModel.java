@@ -6,6 +6,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 /**
  * Model used for storage implementations.
@@ -13,6 +15,13 @@ import java.util.concurrent.CompletableFuture;
  * @since 0.0.1
  */
 public interface DataModel {
+  /**
+   * Used to perform async operations for plugin data handling.
+   *
+   * @since 0.0.1
+   */
+  Executor EXECUTOR = Executors.newCachedThreadPool();
+
   /**
    * Loads the storage for this implementation.
    *
@@ -42,10 +51,10 @@ public interface DataModel {
   /**
    * Reads the {@link EntityCachedPlayerModel} data from JSON file expected for this model data.
    *
-   * @param id player uuid needed to find and read model file.
+   * @param name player name needed to find and read model file.
    * @return A {@link CompletableFuture} that provide a {@link ValueObjectDataResult} with an
    * expected status code for this operation, possible status codes.
    * @since 0.0.1
    */
-  @NotNull CompletableFuture<@NotNull ValueObjectDataResult<@Nullable EntityCachedPlayerModel>> performAsyncRead(final @NotNull String id);
+  @NotNull CompletableFuture<@NotNull ValueObjectDataResult<@Nullable EntityCachedPlayerModel>> performAsyncRead(final @NotNull String name);
 }
