@@ -21,6 +21,14 @@ import org.jetbrains.annotations.Nullable;
  */
 public record EntityHomeModel(@NotNull String id, @NotNull String worldName, double x, double y, double z) {
   /**
+   * Used to concatenate and build a formatted String with the location
+   * coordinates for this home.
+   *
+   * @since 0.0.1
+   */
+  private static final StringBuilder BUILDER = new StringBuilder();
+
+  /**
    * Returns the ID for this home.
    *
    * @return The home ID.
@@ -76,12 +84,26 @@ public record EntityHomeModel(@NotNull String id, @NotNull String worldName, dou
    * @return The home {@link Location}.
    * @since 0.0.1
    */
-  public @NotNull Location toLocation() {
+  public @NotNull Location asLocation() {
     final World world = Bukkit.getWorld(this.worldName);
     if (world == null) {
       throw new IllegalArgumentException("World %s cannot be resolved.".formatted(this.worldName));
     }
     return new Location(world, this.x, this.y, this.z);
+  }
+
+  /**
+   * Returns a formatted string with the coordinates values for this home.
+   *
+   * @return The formatted home coordinates.
+   * @since 0.0.1
+   */
+  public @NotNull String asFormattedPosition() {
+    return BUILDER.append(this.x).append(", ")
+      .append(this.y)
+      .append(", ")
+      .append(this.z)
+      .toString();
   }
 
   /**
@@ -93,11 +115,11 @@ public record EntityHomeModel(@NotNull String id, @NotNull String worldName, dou
    * • {@link ValueObjectHomeResult#withStatus(Object, byte)} with status code -5 and this {@link EntityHomeModel}
    * reference if teleport is successful.<p>
    * • {@link ValueObjectHomeResult#withStatus(Object, byte)} with status code -6 if teleport is failed.
-   * @see EntityHomeModel#toLocation()
+   * @see EntityHomeModel#asLocation()
    * @since 0.0.1
    */
   public @NotNull ValueObjectHomeResult<@Nullable EntityHomeModel> performTeleportAsync(final @NotNull Player player) {
-    final boolean successTeleport = player.teleportAsync(this.toLocation(), PlayerTeleportEvent.TeleportCause.PLUGIN).join();
-    return successTeleport ? ValueObjectHomeResult.withStatus(this, (byte) -5) : ValueObjectHomeResult.withStatus(null, (byte) -6);
+    final boolean successTeleport = player.teleportAsync(this.asLocation(), PlayerTeleportEvent.TeleportCause.PLUGIN).join();
+    return successTeleport ? ValueObjectHomeResult.withStatus(null, (byte) -5) : ValueObjectHomeResult.withStatus(null, (byte) -6);
   }
 }
