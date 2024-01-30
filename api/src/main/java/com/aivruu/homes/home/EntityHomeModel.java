@@ -10,7 +10,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * This class represents a home with their ID and specific position.
+ * This class represents a home with
+ * their ID and specific position.
  *
  * @param id needed to identify the home.
  * @param worldName world name for the home.
@@ -21,8 +22,8 @@ import org.jetbrains.annotations.Nullable;
  */
 public record EntityHomeModel(@NotNull String id, @NotNull String worldName, double x, double y, double z) {
   /**
-   * Used to concatenate and build a formatted String with the location
-   * coordinates for this home.
+   * Used to concatenate and build a formatted
+   * String with the location coordinates for this home.
    *
    * @since 0.0.1
    */
@@ -49,7 +50,8 @@ public record EntityHomeModel(@NotNull String id, @NotNull String worldName, dou
   }
 
   /**
-   * Returns the X value in the location of the established home.
+   * Returns the X value in the location
+   * of the established home.
    *
    * @return The X coordinate.
    * @since 0.0.1
@@ -79,7 +81,8 @@ public record EntityHomeModel(@NotNull String id, @NotNull String worldName, dou
   }
 
   /**
-   * Returns a new {@link Location} based on the position values for this object.
+   * Returns a new {@link Location} based on
+   * the position values for this object.
    *
    * @return The home {@link Location}.
    * @since 0.0.1
@@ -93,7 +96,8 @@ public record EntityHomeModel(@NotNull String id, @NotNull String worldName, dou
   }
 
   /**
-   * Returns a formatted string with the coordinates values for this home.
+   * Returns a formatted string with
+   * the coordinates values for this home.
    *
    * @return The formatted home coordinates.
    * @since 0.0.1
@@ -107,14 +111,16 @@ public record EntityHomeModel(@NotNull String id, @NotNull String worldName, dou
   }
 
   /**
-   * Performs an async operation for the player targeted teleport to this home location.
+   * Performs an async operation for the player
+   * targeted teleport to this home location.
    *
    * @param player needed to perform the teleport.
    * @return A status code of {@link ValueObjectHomeResult}, expected status codes.<p>
    * <p>
-   * • {@link ValueObjectHomeResult#withStatus(Object, byte)} with status code -5 and this {@link EntityHomeModel}
-   * reference if teleport is successful.<p>
-   * • {@link ValueObjectHomeResult#withStatus(Object, byte)} with status code -6 if teleport is failed.
+   * • {@link ValueObjectHomeResult#withStatus(Object, byte)} with status code -5
+   * and this {@link EntityHomeModel} reference if teleport is successful.<p>
+   * • {@link ValueObjectHomeResult#withStatus(Object, byte)} with status code -6
+   * if teleport is failed.
    * @see EntityHomeModel#asLocation()
    * @since 0.0.1
    */
