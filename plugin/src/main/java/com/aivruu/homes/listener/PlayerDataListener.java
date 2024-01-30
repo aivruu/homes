@@ -1,5 +1,6 @@
 package com.aivruu.homes.listener;
 
+import com.aivruu.homes.home.EntityHomeModel;
 import com.aivruu.homes.player.EntityCachedPlayerModel;
 import com.aivruu.homes.repository.PlayerModelRepository;
 import com.aivruu.homes.shared.DataModel;
@@ -28,13 +29,11 @@ public class PlayerDataListener implements Listener {
     if (event.getLoginResult() != AsyncPlayerPreLoginEvent.Result.ALLOWED) {
       return;
     }
-    this.data.performAsyncRead(event.getName()).thenAccept(playerDataStatus -> {
-      if (playerDataStatus.error()) {
-        this.logger.warn(ComponentUtils.parse("<red>Could not read model data for player <player-name>", Placeholder.parsed("player-name", event.getName())));
+    this.data.performAsyncRead(event.getName()).thenAccept(playerModel -> {
+      if (playerModel == null) {
+        this.repository.add(new EntityCachedPlayerModel(event.getUniqueId(), event.getName(), new EntityHomeModel[]{}));
         return;
       }
-      final EntityCachedPlayerModel playerModel = playerDataStatus.result();
-      assert playerModel != null;
       this.repository.add(playerModel);
     });
   }
@@ -45,9 +44,9 @@ public class PlayerDataListener implements Listener {
     if (playerModel == null) {
       return;
     }
-    this.data.performAsyncWrite(playerModel).thenAccept(playerDataStatus -> {
-      if (playerDataStatus.error()) {
-        this.logger.warn(ComponentUtils.parse("<red>Could not write data into model for player <player-name>", Placeholder.parsed("player-name", playerModel.name())));
+    this.data.performAsyncWrite(playerModel).thenAccept(wasSaved -> {
+      if (wasSaved) {
+        this.logger.warn(ComponentUtils.parse("<red>Could not save model data for player <player-name>", Placeholder.parsed("player-name", playerModel.name())));
       }
     });
   }
