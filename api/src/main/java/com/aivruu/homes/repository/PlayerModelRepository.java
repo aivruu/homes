@@ -4,7 +4,6 @@ import com.aivruu.homes.player.EntityCachedPlayerModel;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -19,16 +18,6 @@ public class PlayerModelRepository {
 
   public PlayerModelRepository() {
     this.players = new ConcurrentHashMap<>();
-  }
-
-  /**
-   * Returns a {@link Collection} with every player model.
-   *
-   * @return A {@link Collection} with the players data models.
-   * @since 0.0.1
-   */
-  public @NotNull Collection<@NotNull EntityCachedPlayerModel> playerModelsCollection() {
-    return this.players.values();
   }
 
   /**
