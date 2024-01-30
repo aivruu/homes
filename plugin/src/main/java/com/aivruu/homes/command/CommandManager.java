@@ -47,6 +47,6 @@ public class CommandManager {
   }
 
   public void load(final @NotNull HomeAggregate aggregate, final @NotNull HomeTeleportManager teleportManager) {
-    this.commandManager.registerCommand(new MainCommand(aggregate, teleportManager, this.config, this.message));
+    this.commandManager.registerCommand(new HomesCommand(aggregate, teleportManager, this.config, this.message));
   }
 }
