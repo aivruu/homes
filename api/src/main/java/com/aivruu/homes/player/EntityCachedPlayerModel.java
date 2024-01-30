@@ -1,6 +1,5 @@
 package com.aivruu.homes.player;
 
-import com.aivruu.homes.home.HomeAggregate;
 import com.aivruu.homes.home.EntityHomeModel;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -16,12 +15,6 @@ import java.util.UUID;
  * @since 0.0.1
  */
 public record EntityCachedPlayerModel(@NotNull UUID id, @NotNull String name, @NotNull EntityHomeModel[] homes) {
-  public EntityCachedPlayerModel {
-    if (homes.length > HomeAggregate.MAX_ALLOWED_HOMES_AMOUNT) {
-      throw new IllegalArgumentException("Homes by player cannot be more than " + HomeAggregate.MAX_ALLOWED_HOMES_AMOUNT);
-    }
-  }
-
   /**
    * Returns the {@link UUID} for this entity/player.
    *
@@ -62,20 +55,6 @@ public record EntityCachedPlayerModel(@NotNull UUID id, @NotNull String name, @N
     final Player player = Bukkit.getPlayer(this.id);
     if (player == null) {
       throw new IllegalArgumentException("Player with uid: %s could not be founded.".formatted(this.id));
-    }
-    return player;
-  }
-
-  /**
-   * Returns the {@link Player} using their name.
-   *
-   * @return A {@link Player}.
-   * @since 0.0.1
-   */
-  public @NotNull Player findByName() {
-    final Player player = Bukkit.getPlayer(this.name);
-    if (player == null) {
-      throw new IllegalArgumentException("Player with name: %s could not be founded.".formatted(this.name));
     }
     return player;
   }
