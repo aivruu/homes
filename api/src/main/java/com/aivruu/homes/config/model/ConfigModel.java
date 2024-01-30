@@ -3,8 +3,12 @@ package com.aivruu.homes.config.model;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 @ConfigSerializable
-public class ConfigModel extends BaseConfigModel {
+public class ConfigModel extends SerializableConfigModel {
   public String prefix = "<green>[Homes] <gray>>";
+
+  public byte normalMaxHomesAmount = 5;
+
+  public byte rankMaxHomes = 10;
 
   public boolean showErrorStack = false;
 
