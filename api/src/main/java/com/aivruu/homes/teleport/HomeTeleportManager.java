@@ -25,11 +25,13 @@ public class HomeTeleportManager {
    * 
    * @param player needed to find home and perform teleportation.
    * @param homeId identifier needed to find the home.
-   * @return A boolean status expected by {@link ValueObjectHomeResult}, possible status devolved.<p>
-   * <p>
-   * • {@code true} if status code returned by {@link EntityHomeModel#performTeleportAsync(Player)}
+   * @return A boolean status expected by {@link ValueObjectHomeResult},
+   * possible status devolved.<p><p>
+   * • {@code true} if status code returned by
+   * {@link EntityHomeModel#performTeleportAsync(Player)}
    * is -5 (teleport successful).<p>
-   * • {@code false} if the status code returned by {@link HomeAggregate#performHomeSearch(UUID, String)}
+   * • {@code false} if the status code returned by
+   * {@link HomeAggregate#performHomeSearch(UUID, String)}
    * is -6 (home not found).
    * @see HomeAggregate#performHomeSearch(UUID, String)
    * @see EntityHomeModel#performTeleportAsync(Player)
