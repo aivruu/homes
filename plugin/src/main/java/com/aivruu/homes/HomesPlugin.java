@@ -3,11 +3,11 @@ package com.aivruu.homes;
 import com.aivruu.homes.command.CommandManager;
 import com.aivruu.homes.config.ValueObjectConfigManager;
 import com.aivruu.homes.config.model.ConfigModel;
+import com.aivruu.homes.config.model.HomesMenuConfigModel;
 import com.aivruu.homes.config.model.MessageConfigModel;
 import com.aivruu.homes.home.HomeAggregate;
 import com.aivruu.homes.listener.PlayerDataListener;
 import com.aivruu.homes.repository.PlayerModelRepository;
-import com.aivruu.homes.result.ValueObjectConfigResult;
 import com.aivruu.homes.shared.DataModel;
 import com.aivruu.homes.shared.cloud.MongoDBModelData;
 import com.aivruu.homes.shared.disk.JsonModelData;
@@ -24,6 +24,7 @@ public final class HomesPlugin extends JavaPlugin implements Homes {
   private ComponentLogger logger;
   private ConfigModel config;
   private MessageConfigModel message;
+  private HomesMenuConfigModel homesMenu;
   private DataModel data;
   private PlayerModelRepository repository;
   private HomeAggregate homeAggregate;
@@ -37,15 +38,17 @@ public final class HomesPlugin extends JavaPlugin implements Homes {
     this.logger.info(ComponentUtils.parse("<green>Prepare plugin internal components."));
     this.logger.info(ComponentUtils.parse("<yellow>Loading configuration models."));
     final Path pluginFolder = this.getDataFolder().toPath();
-    final ValueObjectConfigResult<ConfigModel> configStatus = ValueObjectConfigManager.INSTANCE.loadConfig(pluginFolder);
-    final ValueObjectConfigResult<MessageConfigModel> messageStatus = ValueObjectConfigManager.INSTANCE.loadMessages(pluginFolder);
-    if (!configStatus.load() || !messageStatus.load()) {
+    final ConfigModel configModel = ValueObjectConfigManager.loadConfig(pluginFolder, "config.json", ConfigModel.class);
+    final MessageConfigModel messageModel= ValueObjectConfigManager.loadConfig(pluginFolder, "messages.json", MessageConfigModel.class);
+    final HomesMenuConfigModel homesMenuModel = ValueObjectConfigManager.loadConfig(pluginFolder, "homes_menu.json", HomesMenuConfigModel.class);
+    if ((configModel == null) || (messageModel == null) || (homesMenuModel == null)) {
       this.logger.error(ComponentUtils.parse("<red>One or several of the configuration models could not be loaded correctly."));
       this.setEnabled(false);
       return;
     }
-    this.config = configStatus.result();
-    this.message = messageStatus.result();
+    this.config = configModel;
+    this.message = messageModel;
+    this.homesMenu = homesMenuModel;
     this.repository = new PlayerModelRepository();
     this.homeAggregate = new HomeAggregate(this.repository);
     this.homeTeleportManager = new HomeTeleportManager(this.homeAggregate);
@@ -64,8 +67,8 @@ public final class HomesPlugin extends JavaPlugin implements Homes {
   @SuppressWarnings("UnstableApiUsage")
   @Override
   public void onEnable() {
-    this.data.performLoad().thenAccept(loadStatus -> {
-      if (!loadStatus) {
+    this.data.performLoad().thenAccept(wasLoaded -> {
+      if (!wasLoaded) {
         this.logger.error(ComponentUtils.parse("<red>Storage could not be loaded correctly."));
         this.setEnabled(false);
         return;
@@ -87,8 +90,8 @@ public final class HomesPlugin extends JavaPlugin implements Homes {
     }
     this.logger.info(ComponentUtils.parse("<green>Preparing plugin services to perform stop execution."));
     this.repository.clean();
-    this.data.performUnload().thenAccept(unloadStatus -> {
-      if (!unloadStatus) {
+    this.data.performUnload().thenAccept(wasUnloaded -> {
+      if (!wasUnloaded) {
         this.logger.warn(ComponentUtils.parse("<red>The connection with the storage could not be closed correctly."));
         return;
       }
