@@ -47,8 +47,9 @@ public record ValueObjectHomeResult<T>(@Nullable T result, byte status) {
   /**
    * Creates a new {@link ValueObjectHomeResult} with a {@link EntityHomeModel}.
    *
-   * @return A {@link ValueObjectHomeResult} with the status {@link ValueObjectHomeResult#ADDED_STATUS}
-   * and a {@link EntityHomeModel} that represents the home created and added.
+   * @return A {@link ValueObjectHomeResult} with
+   * the status {@link ValueObjectHomeResult#ADDED_STATUS} and
+   * a {@link EntityHomeModel} that represents the home created and added.
    * @since 0.0.1
    */
   public static @NotNull ValueObjectHomeResult<@NotNull EntityHomeModel> withAdded(final @NotNull EntityHomeModel entityHomeModel) {
@@ -58,7 +59,8 @@ public record ValueObjectHomeResult<T>(@Nullable T result, byte status) {
   /**
    * Creates a new {@link ValueObjectHomeResult} that represents a removed.
    *
-   * @return A {@link ValueObjectHomeResult} with the status {@link ValueObjectHomeResult#REMOVED_STATUS}.
+   * @return A {@link ValueObjectHomeResult} with
+   * the status {@link ValueObjectHomeResult#REMOVED_STATUS}.
    * @param <T> object for this result.
    * @since 0.0.1
    */
@@ -80,7 +82,8 @@ public record ValueObjectHomeResult<T>(@Nullable T result, byte status) {
   /**
    * Creates a new {@link ValueObjectHomeResult} that represents the 'clean' status.
    *
-   * @param cleanedArrayLengthAsByte the cleaned array length as a {@code byte} type reference.
+   * @param cleanedArrayLengthAsByte the cleaned array length as
+   * a {@code byte} type reference.
    * @return A {@code byte} value as result.
    * @since 0.0.1
    */
@@ -91,7 +94,8 @@ public record ValueObjectHomeResult<T>(@Nullable T result, byte status) {
   /**
    * Creates a new {@link ValueObjectHomeResult} that represents an error.
    *
-   * @return A {@link ValueObjectHomeResult} with the status {@link ValueObjectHomeResult#ERROR_STATUS}.
+   * @return A {@link ValueObjectHomeResult} with
+   * the status {@link ValueObjectHomeResult#ERROR_STATUS}.
    * @param <T> object for this result.
    * @since 0.0.1
    */
@@ -101,7 +105,8 @@ public record ValueObjectHomeResult<T>(@Nullable T result, byte status) {
 
 
   /**
-   * Creates a new {@link ValueObjectHomeResult} that represents the status specified.
+   * Creates a new {@link ValueObjectHomeResult} that
+   * represents the status specified.
    *
    * @param result result object for this operation.
    * @param status code of status.
