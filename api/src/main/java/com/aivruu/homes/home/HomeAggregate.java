@@ -20,7 +20,6 @@ import java.util.UUID;
  * @since 0.0.1
  */
 public class HomeAggregate {
-  public static final byte MAX_ALLOWED_HOMES_AMOUNT = 16;
   private final PlayerModelRepository repository;
 
   public HomeAggregate(final @NotNull PlayerModelRepository repository) {
