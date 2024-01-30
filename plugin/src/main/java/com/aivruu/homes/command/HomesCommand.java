@@ -7,7 +7,6 @@ import com.aivruu.homes.config.model.ConfigModel;
 import com.aivruu.homes.config.model.MessageConfigModel;
 import com.aivruu.homes.home.EntityHomeModel;
 import com.aivruu.homes.home.HomeAggregate;
-import com.aivruu.homes.result.ValueObjectConfigResult;
 import com.aivruu.homes.result.ValueObjectHomeResult;
 import com.aivruu.homes.teleport.HomeTeleportManager;
 import com.aivruu.homes.utils.ComponentUtils;
@@ -26,13 +25,13 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainCommand extends BaseCommand {
+public class HomesCommand extends BaseCommand {
   private final HomeAggregate aggregate;
   private final HomeTeleportManager teleportManager;
   private MessageConfigModel message;
   private ConfigModel config;
 
-  public MainCommand(final @NotNull HomeAggregate aggregate, final @NotNull HomeTeleportManager teleportManager, final @NotNull ConfigModel config, final @NotNull MessageConfigModel message) {
+  public HomesCommand(final @NotNull HomeAggregate aggregate, final @NotNull HomeTeleportManager teleportManager, final @NotNull ConfigModel config, final @NotNull MessageConfigModel message) {
     super("homes");
     this.aggregate = aggregate;
     this.teleportManager = teleportManager;
@@ -43,7 +42,7 @@ public class MainCommand extends BaseCommand {
   @Default
   @Requirement("player")
   public void mainCommand(final @NotNull Player player) {
-    player.sendMessage(ComponentUtils.parse("<prefix> Thanks for using the plugin! You can see the commands available typing /homes help", Placeholder.parsed("prefix", this.config.prefix)));
+    player.sendMessage(ComponentUtils.parse("<prefix> Thanks for using the plugin! You can see the commands available typing <yellow>/homes help", Placeholder.parsed("prefix", this.config.prefix)));
   }
 
   @SubCommand("about")
@@ -52,7 +51,11 @@ public class MainCommand extends BaseCommand {
     @Requirement("about-perm")
   })
   public void aboutCommand(final @NotNull Player player) {
-    player.sendMessage(ComponentUtils.parse("<prefix> Running on Paper <paper-release> with the release <version>", Placeholder.parsed("paper-release", Bukkit.getBukkitVersion()), Placeholder.parsed("version", Constants.VERSION)));
+    player.sendMessage(ComponentUtils.parse(
+      "<prefix> Running on Paper <aqua><paper-release></aqua> with the release <green><version>",
+      Placeholder.parsed("prefix", this.config.prefix),
+      Placeholder.parsed("paper-release", Bukkit.getBukkitVersion()),
+      Placeholder.parsed("version", Constants.VERSION)));
   }
 
   @SubCommand("help")
@@ -61,7 +64,9 @@ public class MainCommand extends BaseCommand {
     @Requirement("help-perm")
   })
   public void helpCommand(final @NotNull Player player) {
-    this.message.help.forEach(iteratedMessage -> player.sendMessage(ComponentUtils.parse(iteratedMessage)));
+    for (final String iteratedMessage : this.message.help) {
+      player.sendMessage(ComponentUtils.parse(iteratedMessage));
+    }
   }
 
   @SubCommand("reload")
@@ -71,16 +76,14 @@ public class MainCommand extends BaseCommand {
   })
   public void reloadCommand(final @NotNull Player player) {
     final Path pluginFolder = HomesPlugin.getPlugin(HomesPlugin.class).getDataFolder().toPath();
-    final ValueObjectConfigResult<ConfigModel> newConfigStatus = ValueObjectConfigManager.INSTANCE.loadConfig(pluginFolder);
-    final ValueObjectConfigResult<MessageConfigModel> newMessageStatus = ValueObjectConfigManager.INSTANCE.loadMessages(pluginFolder);
-    if (!newConfigStatus.load() || !newMessageStatus.load()) {
+    final ConfigModel newConfigModel = ValueObjectConfigManager.loadConfig(pluginFolder, "config.yml", ConfigModel.class);
+    final MessageConfigModel newMessageModel = ValueObjectConfigManager.loadConfig(pluginFolder, "messages.yml", MessageConfigModel.class);
+    if ((newConfigModel == null) || (newMessageModel == null)) {
       player.sendMessage(ComponentUtils.parse(this.message.reloadFailed, Placeholder.parsed("prefix", this.config.prefix)));
       return;
     }
-    this.config = newConfigStatus.result();
-    this.message = newMessageStatus.result();
-    assert config != null;
-    assert message != null;
+    this.config = newConfigModel;
+    this.message = newMessageModel;
     player.sendMessage(ComponentUtils.parse(this.message.reloadSuccess, Placeholder.parsed("prefix", this.config.prefix)));
   }
 
@@ -114,11 +117,12 @@ public class MainCommand extends BaseCommand {
     }
     final EntityHomeModel entityHomeModel = homeSearchStatus.result();
     assert entityHomeModel != null;
-    ComponentUtils.parse(
-      this.message.homeInfo,
-      Placeholder.parsed("home-id", entityHomeModel.id()),
-      Placeholder.parsed("home-world", entityHomeModel.worldName()),
-      Placeholder.parsed("home-formatted-position", entityHomeModel.asFormattedPosition()));
+    for (final String iteratedMessage : this.message.homeInfo) {
+      player.sendMessage(ComponentUtils.parse(iteratedMessage,
+        Placeholder.parsed("home-id", entityHomeModel.id()),
+        Placeholder.parsed("home-world", entityHomeModel.worldName()),
+        Placeholder.parsed("home-formatted-position", entityHomeModel.asFormattedPosition())));
+    }
   }
 
   @SubCommand("list")
@@ -147,11 +151,22 @@ public class MainCommand extends BaseCommand {
     @Requirement("create-perm")
   })
   public void createExecutor(final @NotNull Player player, final @NotNull @ArgName("home-identifier") String homeId) {
-    final ValueObjectHomeResult<EntityHomeModel> homeCreationStatus = this.aggregate.performHomeCreate(player, homeId);
-    if (homeCreationStatus.statusIs((byte) -10)) {
-      player.sendMessage(ComponentUtils.parse(this.message.alreadyHomeExisting, Placeholder.parsed("prefix", this.config.prefix)));
+    final byte maxAllowedHomes;
+    if (player.hasPermission("homes.limit.rank")) {
+      maxAllowedHomes = this.config.rankMaxHomes;
+    } else {
+      maxAllowedHomes = this.config.normalMaxHomesAmount;
+    }
+    final EntityHomeModel[] playerHomesArray = this.aggregate.performPlayerHomesList(player.getUniqueId()).result();
+    if (playerHomesArray.length - 1 == maxAllowedHomes) {
+      player.sendMessage(ComponentUtils.parse(this.message.homesLimit, Placeholder.parsed("prefix", this.config.prefix)));
       return;
-    } else if (homeCreationStatus.statusIs((byte) -4)) {
+    }
+    final ValueObjectHomeResult<EntityHomeModel> homeCreationStatus = this.aggregate.performHomeCreate(player, homeId);
+    if (homeCreationStatus.statusIs((byte) -4)) {
+      return;
+    } else if (homeCreationStatus.statusIs((byte) -10)) {
+      player.sendMessage(ComponentUtils.parse(this.message.alreadyHomeExisting, Placeholder.parsed("prefix", this.config.prefix)));
       return;
     }
     player.sendMessage(ComponentUtils.parse(this.message.homeCreation, Placeholder.parsed("prefix", this.config.prefix), Placeholder.parsed("home-id", homeId)));
