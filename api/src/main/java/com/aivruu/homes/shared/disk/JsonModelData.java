@@ -2,7 +2,6 @@ package com.aivruu.homes.shared.disk;
 
 import com.aivruu.homes.config.model.ConfigModel;
 import com.aivruu.homes.player.EntityCachedPlayerModel;
-import com.aivruu.homes.result.ValueObjectDataResult;
 import com.aivruu.homes.shared.DataModel;
 import com.google.gson.Gson;
 import org.jetbrains.annotations.NotNull;
@@ -43,39 +42,38 @@ public class JsonModelData implements DataModel {
   }
 
   @Override
-  public @NotNull CompletableFuture<@NotNull ValueObjectDataResult<@Nullable EntityCachedPlayerModel>> performAsyncWrite(final @NotNull EntityCachedPlayerModel playerModel) {
+  public @NotNull CompletableFuture<@NotNull Boolean> performAsyncWrite(final @NotNull EntityCachedPlayerModel playerModel) {
     return CompletableFuture.supplyAsync(() -> {
       final File file = new File(this.dataFolder, playerModel.name() + ".json");
       try (final Writer writer = new FileWriter(file)) {
         if (!file.exists() && !file.createNewFile()) {
-          return ValueObjectDataResult.withError();
+          return false;
         }
         this.gson.toJson(playerModel, writer);
-        return ValueObjectDataResult.withWrite(playerModel);
+        return true;
       } catch (final IOException exception) {
         if (this.config.showErrorStack) {
           exception.printStackTrace();
         }
-        return ValueObjectDataResult.withError();
+        return false;
       }
     }, EXECUTOR);
   }
 
   @Override
-  public @NotNull CompletableFuture<@NotNull ValueObjectDataResult<@Nullable EntityCachedPlayerModel>> performAsyncRead(final @NotNull String playerName) {
+  public @NotNull CompletableFuture<@Nullable EntityCachedPlayerModel> performAsyncRead(final @NotNull String playerName) {
     return CompletableFuture.supplyAsync(() -> {
       final File file = new File(this.dataFolder, playerName + ".json");
       if (!file.exists()) {
-        return ValueObjectDataResult.withError();
+        return null;
       }
       try (final Reader reader = new FileReader(file)) {
-        final EntityCachedPlayerModel playerModel = this.gson.fromJson(reader, EntityCachedPlayerModel.class);
-        return ValueObjectDataResult.withRead(playerModel);
+        return this.gson.fromJson(reader, EntityCachedPlayerModel.class);
       } catch (final IOException exception) {
         if (this.config.showErrorStack) {
           exception.printStackTrace();
         }
-        return ValueObjectDataResult.withError();
+        return null;
       }
     }, EXECUTOR);
   }
