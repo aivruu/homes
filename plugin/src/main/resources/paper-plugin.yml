@@ -1,8 +1,7 @@
-name: Homes
-main: com.aivruu.homes.HomesPlugin
-loader: com.aivruu.homes.HomesPluginLoader
-authors: [ Qekly ]
+name: AldrHomes
+main: io.github.aivruu.homes.HomesPlugin
+loader: io.github.aivruu.homes.library.infrastructure.HomesPluginLoader
+authors: [ aivruu ]
 
 api-version: "1.20"
 version: ${version}
-description: Lightweight and efficient Paper plugin to create multiple homes.
