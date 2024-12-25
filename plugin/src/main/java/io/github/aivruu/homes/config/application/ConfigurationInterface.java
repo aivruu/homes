@@ -16,8 +16,4 @@
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 package io.github.aivruu.homes.config.application;
 
-import org.jetbrains.annotations.NotNull;
-
-public interface ConfigurationInterface<C> {
-  @NotNull C configuration();
-}
+public interface ConfigurationInterface {}

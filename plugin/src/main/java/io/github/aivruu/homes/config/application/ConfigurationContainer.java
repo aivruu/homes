@@ -14,9 +14,8 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
-package io.github.aivruu.homes.config.infrastructure;
+package io.github.aivruu.homes.config.application;
 
-import io.github.aivruu.homes.config.application.ConfigurationInterface;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.ConfigurateException;
@@ -35,7 +34,7 @@ public record ConfigurationContainer<C>(C model, HoconConfigurationLoader loader
     }
   }
 
-  public static <C extends ConfigurationInterface<C>> @Nullable ConfigurationContainer<C> of(
+  public static <C extends ConfigurationInterface> @Nullable ConfigurationContainer<C> of(
     final Path directory,
     final String fileName,
     final Class<C> modelClass
