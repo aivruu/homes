@@ -27,7 +27,7 @@ import java.util.concurrent.Executors;
  * @since 2.0.0
  */
 public final class ExecutorHelper {
-  private static Executor executorPool;
+  private static Executor pool;
 
   private ExecutorHelper() {
     throw new UnsupportedOperationException("This class is for utility and cannot be instantiated.");
@@ -39,8 +39,8 @@ public final class ExecutorHelper {
    * @return The {@link Executor}.
    * @since 2.0.0
    */
-  public static @NotNull Executor executorPool() {
-    return executorPool;
+  public static @NotNull Executor pool() {
+    return pool;
   }
 
   /**
@@ -50,9 +50,9 @@ public final class ExecutorHelper {
    * @since 2.0.0
    */
   public static void createPool(final int threads) {
-    if (executorPool != null) {
+    if (pool != null) {
       return;
     }
-    executorPool = Executors.newFixedThreadPool(threads, r -> new Thread(r, "Homes-Thread-Executor"));
+    pool = Executors.newFixedThreadPool(threads, r -> new Thread(r, "Homes-Thread-Executor"));
   }
 }
