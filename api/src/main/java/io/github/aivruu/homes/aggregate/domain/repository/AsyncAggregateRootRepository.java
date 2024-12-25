@@ -20,6 +20,8 @@ import io.github.aivruu.homes.aggregate.domain.AggregateRoot;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -33,6 +35,11 @@ public interface AsyncAggregateRootRepository<A extends AggregateRoot> extends A
   @Override
   default @Nullable A findSync(final @NotNull String id) {
     return null;
+  }
+
+  @Override
+  default @NotNull Collection<A> findAllSync() {
+    return List.of();
   }
 
   @Override

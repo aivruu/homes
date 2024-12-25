@@ -20,6 +20,8 @@ import io.github.aivruu.homes.aggregate.domain.AggregateRoot;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collection;
+
 /**
  * This interface-contract defines the method that implementations must follow to
  * proportionate information-handling in-cache for {@link AggregateRoot}.
@@ -36,6 +38,14 @@ public interface AggregateRootRepository<A extends AggregateRoot> {
    * @since 2.0.0
    */
   @Nullable A findSync(final @NotNull String id);
+
+  /**
+   * Returns the {@link Collection} with this repository's all {@link AggregateRoot}s.
+   *
+   * @return A {@link Collection} with this repository's {@link AggregateRoot}s.
+   * @since 2.0.0
+   */
+  @NotNull Collection<A> findAllSync();
 
   /**
    * Saves the given {@link AggregateRoot} into repository.

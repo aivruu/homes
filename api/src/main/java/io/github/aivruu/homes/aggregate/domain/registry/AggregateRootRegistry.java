@@ -20,6 +20,8 @@ import io.github.aivruu.homes.aggregate.domain.AggregateRoot;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collection;
+
 /**
  * This interface defines the set of methods that subclasses must implement to perform
  * any operation with {@link AggregateRoot}'s registries related.
@@ -57,6 +59,14 @@ public interface AggregateRootRegistry<A extends AggregateRoot> {
    * @since 2.0.0
    */
   @Nullable A findInInfrastructure(final @NotNull String id);
+
+  /**
+   * Returns a {@link Collection} with the registry's currently cached {@link AggregateRoot}s.
+   *
+   * @return A {@link Collection} with the cached {@link AggregateRoot}s.
+   * @since 2.0.0
+   */
+  @NotNull Collection<A> findAllInCache();
 
   /**
    * Checks if the aggregate-root specified is cached or saved at the infrastructure.
