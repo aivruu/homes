@@ -17,21 +17,22 @@
 package io.github.aivruu.homes.command.application;
 
 import com.mojang.brigadier.tree.LiteralCommandNode;
+import io.github.aivruu.homes.config.application.ConfigurationContainer;
 import io.github.aivruu.homes.config.application.ConfigurationInterface;
-import io.github.aivruu.homes.config.infrastructure.object.ConfigurationConfigurationModel;
-import io.github.aivruu.homes.config.infrastructure.object.MessagesConfigurationModel;
+import io.github.aivruu.homes.config.application.object.ConfigurationConfigurationModel;
+import io.github.aivruu.homes.config.application.object.MessagesConfigurationModel;
 import io.github.aivruu.homes.permission.application.Permissions;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 
 public abstract class AbstractRegistrableCommand {
-  protected ConfigurationInterface<ConfigurationConfigurationModel> configuration;
-  protected ConfigurationInterface<MessagesConfigurationModel> messages;
+  protected ConfigurationContainer<ConfigurationConfigurationModel> configuration;
+  protected ConfigurationContainer<MessagesConfigurationModel> messages;
 
   protected AbstractRegistrableCommand(
-    final @NotNull ConfigurationInterface<ConfigurationConfigurationModel> configuration,
-    final @NotNull ConfigurationInterface<MessagesConfigurationModel> messages
+    final @NotNull ConfigurationContainer<ConfigurationConfigurationModel> configuration,
+    final @NotNull ConfigurationContainer<MessagesConfigurationModel> messages
   ) {
     this.configuration = configuration;
     this.messages = messages;
