@@ -14,21 +14,14 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
-package io.github.aivruu.homes.config.infrastructure.object;
+package io.github.aivruu.homes.config.application.object;
 
 import io.github.aivruu.homes.config.application.ConfigurationInterface;
-import io.github.aivruu.homes.persistence.infrastructure.InfrastructureRepositoryType;
-import org.jetbrains.annotations.NotNull;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
 
 @ConfigSerializable
-public final class ConfigurationConfigurationModel implements ConfigurationInterface<ConfigurationConfigurationModel> {
-  @Override
-  public @NotNull ConfigurationConfigurationModel configuration() {
-    return this;
-  }
-
+public final class ConfigurationConfigurationModel implements ConfigurationInterface {
   @Comment("""
     Represents the amount of threads that the 'executor-pool' of the plugin will be able to use, this threads
     are used for asynchronous-operations for the plugin's infrastructure, such as load or save information into
@@ -36,24 +29,36 @@ public final class ConfigurationConfigurationModel implements ConfigurationInter
   public int threadsPoolSize = 2;
 
   @Comment("""
-    It means whether the plugin should run on debug-mode, this is used for a more-detailed information about plugin's
-    internal processes (such as information loading or saving), this only must be used in case plugin present a non-correct
-    working.""")
-  public boolean debugIt = false;
+    The infrastructure-type to use for the players' information storage, there are two options:
+    - MONGODB: Uses the database to store the information.
+    - JSON: Uses json-files for information storing at pre-defined directories.""")
+  public String playerInfrastructureRepositoryType = "JSON";
 
-  public InfrastructureRepositoryType playerInfrastructureRepositoryType = InfrastructureRepositoryType.JSON;
+  @Comment("""
+    The infrastructure-type to use for the homes' information storage, there are two options:
+    - MONGODB: Uses the database to store the information.
+    - JSON: Uses json-files for information storing at pre-defined directories.""")
+  public String homeInfrastructureRepositoryType = "JSON";
 
-  public InfrastructureRepositoryType homeInfrastructureRepositoryType = InfrastructureRepositoryType.JSON;
-
+  @Comment("""
+    The name of the MongoDB's database's collection or the directory's name where the homes' information
+    will be stored by the plugin.""")
   public String homeCollectionAndDirectoryName = "homes";
 
+  @Comment("""
+    The name of the MongoDB's database's collection or the directory's name where the players' information
+    will be stored by the plugin.""")
   public String playerCollectionAndDirectoryName = "players";
 
+  @Comment("The mongo-db's host to connect to.")
   public String mongoHost = "localhost";
 
+  @Comment("The mongo-db's port to connect to.")
   public String mongoDatabase = "database";
 
+  @Comment("The mongo-db's username to connect to.")
   public String mongoUsername = "username";
 
+  @Comment("The mongo-db's password to connect to.")
   public String mongoPassword = "password";
 }
