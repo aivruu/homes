@@ -16,18 +16,22 @@
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 package io.github.aivruu.homes.command.application;
 
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.tree.LiteralCommandNode;
-import io.github.aivruu.homes.config.application.ConfigurationInterface;
-import io.github.aivruu.homes.config.infrastructure.object.ConfigurationConfigurationModel;
-import io.github.aivruu.homes.config.infrastructure.object.MessagesConfigurationModel;
+import io.github.aivruu.homes.config.application.ConfigurationContainer;
+import io.github.aivruu.homes.config.application.object.ConfigurationConfigurationModel;
+import io.github.aivruu.homes.config.application.object.MessagesConfigurationModel;
+import io.github.aivruu.homes.minimessage.application.MiniMessageHelper;
+import io.github.aivruu.homes.permission.application.Permissions;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
+import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 
 public final class MainCommand extends AbstractRegistrableCommand {
   public MainCommand(
-    final @NotNull ConfigurationInterface<ConfigurationConfigurationModel> configuration,
-    final @NotNull ConfigurationInterface<MessagesConfigurationModel> messages
+    final @NotNull ConfigurationContainer<ConfigurationConfigurationModel> configuration,
+    final @NotNull ConfigurationContainer<MessagesConfigurationModel> messages
   ) {
     super(configuration, messages);
   }
@@ -35,6 +39,30 @@ public final class MainCommand extends AbstractRegistrableCommand {
   @SuppressWarnings("UnstableApiUsage")
   @Override
   public @NotNull LiteralCommandNode<CommandSourceStack> register() {
-    return Commands.literal("homes").build();
+    return Commands.literal("homes")
+      .executes(ctx -> Command.SINGLE_SUCCESS)
+      .then(Commands.literal("help")
+        .requires(src -> super.canUseIt(src.getSender(), Permissions.HELP))
+        .executes(ctx -> {
+          ctx.getSource().getSender().sendMessage(MiniMessageHelper.parse(super.messages.model().help));
+          return Command.SINGLE_SUCCESS;
+        })
+      )
+      .then(Commands.literal("reload")
+        .requires(src -> super.canUseIt(src.getSender(), Permissions.RELOAD))
+        .executes(ctx -> {
+          final CommandSender sender = ctx.getSource().getSender();
+          final MessagesConfigurationModel messages = super.messages.model();
+          super.configuration = super.configuration.reload();
+          super.messages = super.messages.reload();
+          if (super.configuration == null || super.messages == null) {
+            sender.sendMessage(MiniMessageHelper.parse(messages.reloadSuccess));
+          } else {
+            sender.sendMessage(MiniMessageHelper.parse(messages.reloadError));
+          }
+          return Command.SINGLE_SUCCESS;
+        })
+      )
+      .build();
   }
 }
