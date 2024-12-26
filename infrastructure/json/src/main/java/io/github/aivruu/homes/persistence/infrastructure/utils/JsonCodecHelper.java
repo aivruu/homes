@@ -25,7 +25,7 @@ import io.github.aivruu.homes.home.domain.position.HomePositionValueObject;
 import io.github.aivruu.homes.home.infrastructure.json.codec.JsonHomeAggregateRootCodec;
 import io.github.aivruu.homes.home.infrastructure.json.codec.JsonHomeModelEntityCodec;
 import io.github.aivruu.homes.home.infrastructure.json.codec.JsonHomePositionValueObjectCodec;
-import io.github.aivruu.homes.player.domain.PlayerModelEntity;
+import io.github.aivruu.homes.player.domain.PlayerAggregateRoot;
 import io.github.aivruu.homes.player.infrastructure.json.codec.JsonPlayerAggregateRootCodec;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -38,7 +38,7 @@ import java.nio.file.Path;
 
 public final class JsonCodecHelper {
   private static final Gson GSON = new GsonBuilder()
-    .registerTypeAdapter(PlayerModelEntity.class, JsonPlayerAggregateRootCodec.INSTANCE)
+    .registerTypeAdapter(PlayerAggregateRoot.class, JsonPlayerAggregateRootCodec.INSTANCE)
     .registerTypeAdapter(HomeModelEntity.class, JsonHomeModelEntityCodec.INSTANCE)
     .registerTypeAdapter(HomeAggregateRoot.class, JsonHomeAggregateRootCodec.INSTANCE)
     .registerTypeAdapter(HomePositionValueObject.class, JsonHomePositionValueObjectCodec.INSTANCE)
