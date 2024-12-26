@@ -28,11 +28,9 @@ import org.jetbrains.annotations.NotNull;
  */
 public record HomePositionValueObject(int x, int y, int z) {
   @Override
-  public boolean equals(final @NotNull Object obj) {
-    if (obj == this) return true;
-    if (!(obj instanceof HomePositionValueObject homePosition)) {
-      return false;
-    }
-    return this.x == homePosition.x && this.y == homePosition.y && this.z == homePosition.z;
+  public boolean equals(final @NotNull Object o) {
+    if (o == this) return true;
+    if (!(o instanceof HomePositionValueObject that)) return false;
+    return this.x == that.x && this.y == that.y && this.z == that.z;
   }
 }
