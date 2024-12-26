@@ -24,7 +24,9 @@ public enum Permissions {
   DELETE(new Permission("homes.command.delete")),
   LIST(new Permission("homes.command.list")),
   TELEPORT(new Permission("homes.command.teleport")),
-  MODIFY(new Permission("homes.command.modify"));
+  MODIFY(new Permission("homes.command.modify")),
+  RELOAD(new Permission("homes.command.reload")),
+  HELP(new Permission("homes.command.help"));
 
   private final Permission permission;
 
