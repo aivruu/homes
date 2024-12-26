@@ -58,13 +58,15 @@ public final class HomeCreatorService {
    * @see io.github.aivruu.homes.home.application.registry.HomeAggregateRootRegistry#registerAndSave(HomeAggregateRoot)
    * @since 2.0.0
    */
-  public @Nullable HomeModelEntity createHome(final @NotNull Player player, final @NotNull String homeId) {
-    // Where this home is going to be located.
+  public @Nullable HomeModelEntity create(final @NotNull Player player, final @NotNull String homeId) {
+    if (this.homeAggregateRootRegistry.existsGlobally(homeId)) {
+      return null;
+    }
     final Location at = player.getLocation();
     final HomeModelEntity homeModel = new HomeModelEntity(
       homeId, player.getUniqueId().toString(), new HomePositionValueObject(at.getBlockX(), at.getBlockY(), at.getBlockZ()));
-    final HomeAggregateRoot homeAggregateRoot = new HomeAggregateRoot(homeModel);
-    return this.homeAggregateRootRegistry.registerAndSave(homeAggregateRoot) ? homeModel : null;
+    this.homeAggregateRootRegistry.registerAndSave(new HomeAggregateRoot(homeModel));
+    return homeModel;
   }
 
   /**
@@ -75,7 +77,7 @@ public final class HomeCreatorService {
    * @see io.github.aivruu.homes.home.application.registry.HomeAggregateRootRegistry#unregisterGlobally(String)
    * @since 2.0.0
    */
-  public boolean deleteHome(final @NotNull String homeId) {
+  public boolean delete(final @NotNull String homeId) {
     return this.homeAggregateRootRegistry.unregisterGlobally(homeId);
   }
 }
