@@ -25,17 +25,19 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.Duration;
+import java.util.Collection;
 
 public final class HomeCacheAggregateRootRepository implements AggregateRootRepository<HomeAggregateRoot> {
   private final AggregateRootRegistry<HomeAggregateRoot> homeAggregateRootRegistry;
   private final Cache<String, HomeAggregateRoot> cache;
+  private boolean should = true;
 
   public HomeCacheAggregateRootRepository(final @NotNull AggregateRootRegistry<HomeAggregateRoot> homeAggregateRootRegistry) {
     this.homeAggregateRootRegistry = homeAggregateRootRegistry;
     this.cache = Caffeine.newBuilder()
-      .expireAfterAccess(Duration.ofMinutes(5))
+      .expireAfterWrite(Duration.ofMinutes(5))
       .removalListener((key, value, cause) -> {
-        if (value == null) {
+        if (value == null || !should) {
           return;
         }
         this.homeAggregateRootRegistry.save((HomeAggregateRoot) value);
@@ -46,6 +48,11 @@ public final class HomeCacheAggregateRootRepository implements AggregateRootRepo
   @Override
   public @Nullable HomeAggregateRoot findSync(final @NotNull String id) {
     return this.cache.getIfPresent(id);
+  }
+
+  @Override
+  public @NotNull Collection<HomeAggregateRoot> findAllSync() {
+    return this.cache.asMap().values();
   }
 
   @Override
@@ -64,12 +71,12 @@ public final class HomeCacheAggregateRootRepository implements AggregateRootRepo
     if (homeAggregateRoot != null) {
       this.cache.invalidate(id);
     }
-    // Reference should be collected by GC once methods require aggregate-root has finished.
     return homeAggregateRoot;
   }
 
   @Override
   public void clearSync() {
+    should = false;
     this.cache.invalidateAll();
   }
 }

@@ -21,6 +21,7 @@ import io.github.aivruu.homes.player.domain.PlayerAggregateRoot;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,6 +31,11 @@ public final class PlayerCacheAggregateRootRepository implements AggregateRootRe
   @Override
   public @Nullable PlayerAggregateRoot findSync(final @NotNull String id) {
     return this.cache.get(id);
+  }
+
+  @Override
+  public @NotNull Collection<PlayerAggregateRoot> findAllSync() {
+    return this.cache.values();
   }
 
   @Override

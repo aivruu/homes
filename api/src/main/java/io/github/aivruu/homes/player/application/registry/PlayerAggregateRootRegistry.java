@@ -23,6 +23,7 @@ import io.github.aivruu.homes.player.domain.PlayerAggregateRoot;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collection;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -68,6 +69,11 @@ public final class PlayerAggregateRootRegistry implements AggregateRootRegistry<
   }
 
   @Override
+  public @NotNull Collection<PlayerAggregateRoot> findAllInCache() {
+    return this.playerAggregateRootRepository.findAllSync();
+  }
+
+  @Override
   public boolean existsGlobally(final @NotNull String id) {
     return this.playerAggregateRootRepository.existsSync(id) || this.existsInInfrastructure(id);
   }
@@ -87,7 +93,7 @@ public final class PlayerAggregateRootRegistry implements AggregateRootRegistry<
   @Override
   public boolean registerAndSave(final @NotNull PlayerAggregateRoot aggregateRoot) {
     if (this.playerAggregateRootRepository.existsSync(aggregateRoot.id())) {
-      return true;
+      return false;
     }
     this.playerAggregateRootRepository.saveSync(aggregateRoot);
     final AtomicBoolean provider = new AtomicBoolean();

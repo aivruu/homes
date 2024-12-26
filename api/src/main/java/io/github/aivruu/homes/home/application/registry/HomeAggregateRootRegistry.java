@@ -23,6 +23,7 @@ import io.github.aivruu.homes.home.domain.HomeAggregateRoot;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collection;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -71,6 +72,11 @@ public final class HomeAggregateRootRegistry implements AggregateRootRegistry<Ho
         homeAggregateRootAtomicReference.set(providedHomeAggregateRoot);
       });
     return homeAggregateRootAtomicReference.get();
+  }
+
+  @Override
+  public @NotNull Collection<HomeAggregateRoot> findAllInCache() {
+    return this.homeAggregateRootRepository.findAllSync();
   }
 
   @Override
