@@ -19,13 +19,14 @@ package io.github.aivruu.homes.command.application;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.tree.LiteralCommandNode;
-import io.github.aivruu.homes.config.application.ConfigurationInterface;
-import io.github.aivruu.homes.config.infrastructure.object.ConfigurationConfigurationModel;
-import io.github.aivruu.homes.config.infrastructure.object.MessagesConfigurationModel;
+import io.github.aivruu.homes.config.application.ConfigurationContainer;
+import io.github.aivruu.homes.config.application.object.ConfigurationConfigurationModel;
+import io.github.aivruu.homes.config.application.object.MessagesConfigurationModel;
 import io.github.aivruu.homes.home.application.HomeCreatorService;
 import io.github.aivruu.homes.home.application.HomePositionUpdater;
 import io.github.aivruu.homes.home.domain.HomeModelEntity;
 import io.github.aivruu.homes.home.domain.position.HomePositionValueObject;
+import io.github.aivruu.homes.minimessage.application.MiniMessageHelper;
 import io.github.aivruu.homes.permission.application.Permissions;
 import io.github.aivruu.homes.player.application.PlayerHomeController;
 import io.github.aivruu.homes.player.application.PlayerManagerService;
@@ -35,7 +36,7 @@ import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
-import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -46,8 +47,8 @@ public final class HomeCommand extends AbstractRegistrableCommand {
   private final HomePositionUpdater homePositionUpdater;
 
   public HomeCommand(
-    final @NotNull ConfigurationInterface<ConfigurationConfigurationModel> configuration,
-    final @NotNull ConfigurationInterface<MessagesConfigurationModel> messages,
+    final @NotNull ConfigurationContainer<ConfigurationConfigurationModel> configuration,
+    final @NotNull ConfigurationContainer<MessagesConfigurationModel> messages,
     final @NotNull PlayerManagerService playerManagerService,
     final @NotNull PlayerHomeController playerHomeController,
     final @NotNull HomeCreatorService homeCreatorService,
@@ -70,17 +71,17 @@ public final class HomeCommand extends AbstractRegistrableCommand {
         .executes(ctx -> Command.SINGLE_SUCCESS)
         .then(Commands.argument("id", StringArgumentType.word())
           .executes(ctx -> {
+            final MessagesConfigurationModel messages = super.messages.model();
             final Player player = (Player) ctx.getSource().getSender();
-            final HomeModelEntity homeModel = this.homeCreatorService.createHome(player, ctx.getArgument("id", String.class));
+            final HomeModelEntity homeModel = this.homeCreatorService.create(player, ctx.getArgument("id", String.class));
             if (homeModel == null) {
-              player.sendMessage(Component.text("That home already exists or its data couldn't be saved.").color(NamedTextColor.RED));
+              player.sendMessage(MiniMessageHelper.parse(messages.creationError));
               return Command.SINGLE_SUCCESS;
             }
-            final boolean wasAdded = this.playerHomeController.addHome(player, homeModel);
-            if (!wasAdded) {
-              player.sendMessage(Component.text("Seems your information isn't available, or you've reached the max-homes limit.").color(NamedTextColor.RED));
+            if (!this.playerHomeController.addHome(player, homeModel)) {
+              player.sendMessage(MiniMessageHelper.parse(messages.additionError));
             } else {
-              player.sendMessage(Component.text("The home-point has been created.").color(NamedTextColor.GREEN));
+              player.sendMessage(MiniMessageHelper.parse(messages.created));
             }
             return Command.SINGLE_SUCCESS;
           })
@@ -91,12 +92,13 @@ public final class HomeCommand extends AbstractRegistrableCommand {
         .executes(ctx -> Command.SINGLE_SUCCESS)
         .then(Commands.argument("id", StringArgumentType.word())
           .executes(ctx -> {
+            final MessagesConfigurationModel messages = super.messages.model();
             final Player player = (Player) ctx.getSource().getSender();
             final boolean wasRemoved = this.playerHomeController.removeHome(player, ctx.getArgument("id", String.class));
             if (!wasRemoved) {
-              player.sendMessage(Component.text("Seems your information isn't available, home doesn't exist, or you don't have homes created.").color(NamedTextColor.RED));
+              player.sendMessage(MiniMessageHelper.parse(messages.unknownHome));
             } else {
-              player.sendMessage(Component.text("The home-point has been deleted.").color(NamedTextColor.GREEN));
+              player.sendMessage(MiniMessageHelper.parse(messages.deleted));
             }
             return Command.SINGLE_SUCCESS;
           })
@@ -105,19 +107,28 @@ public final class HomeCommand extends AbstractRegistrableCommand {
       .then(Commands.literal("list")
         .requires(src -> super.canUseIt(src.getSender(), Permissions.LIST))
         .executes(ctx -> {
+          final MessagesConfigurationModel messages = super.messages.model();
           final Player player = (Player) ctx.getSource().getSender();
           final PlayerAggregateRoot playerAggregateRoot = this.playerManagerService.playerAggregateRootOf(player.getUniqueId().toString());
           if (playerAggregateRoot == null) {
-            player.sendMessage(Component.text("Seems your information doesn't exist.").color(NamedTextColor.RED));
+            player.sendMessage(MiniMessageHelper.parse(messages.playerUnknownInfo));
             return Command.SINGLE_SUCCESS;
           }
-          final TextComponent.Builder homesComponentBuilder = Component.text();
-          for (final HomeModelEntity homeModel : playerAggregateRoot.homes()) {
-            homesComponentBuilder
-              .append(Component.text("- ").color(NamedTextColor.GRAY))
-              .append(Component.text(homeModel.id()).color(NamedTextColor.GREEN));
+          if (playerAggregateRoot.homes().length == 0) {
+            player.sendMessage(MiniMessageHelper.parse(messages.empty));
+            return Command.SINGLE_SUCCESS;
           }
-          player.sendMessage(homesComponentBuilder.build());
+          final TextComponent.Builder componentBuilder = Component.text().append(MiniMessageHelper.parse(messages.listHeader));
+          for (final HomeModelEntity homeModel : playerAggregateRoot.homes()) {
+            final HomePositionValueObject position = homeModel.position();
+            componentBuilder.append(MiniMessageHelper.parse(messages.homeListFormat,
+              Placeholder.parsed("id", homeModel.id()),
+              Placeholder.parsed("home-x", Integer.toString(position.x())),
+              Placeholder.parsed("home-y", Integer.toString(position.y())),
+              Placeholder.parsed("home-z", Integer.toString(position.z()))));
+          }
+          componentBuilder.append(MiniMessageHelper.parse(messages.listFooter));
+          player.sendMessage(componentBuilder.build());
           return Command.SINGLE_SUCCESS;
         })
       )
@@ -127,11 +138,12 @@ public final class HomeCommand extends AbstractRegistrableCommand {
         .then(Commands.argument("id", StringArgumentType.word())
           .executes(ctx -> {
             final Player player = (Player) ctx.getSource().getSender();
+            final MessagesConfigurationModel messages = super.messages.model();
             final boolean wasTeleported = this.playerHomeController.teleportToHome(player, ctx.getArgument("id", String.class));
             if (!wasTeleported) {
-              player.sendMessage(Component.text("The home-point doesn't exist.").color(NamedTextColor.RED));
+              player.sendMessage(MiniMessageHelper.parse(messages.unknownHome));
             } else {
-              player.sendMessage(Component.text("You've been teleported to your home-point.").color(NamedTextColor.GREEN));
+              player.sendMessage(MiniMessageHelper.parse(messages.teleported));
             }
             return Command.SINGLE_SUCCESS;
           })
@@ -142,13 +154,14 @@ public final class HomeCommand extends AbstractRegistrableCommand {
         .executes(ctx -> Command.SINGLE_SUCCESS)
         .then(Commands.argument("id", StringArgumentType.word())
           .executes(ctx -> {
+            final MessagesConfigurationModel messages = super.messages.model();
             final Player player = (Player) ctx.getSource().getSender();
             final ValueObjectMutationResult<HomePositionValueObject> result = this.homePositionUpdater.updatePosition(
               player, ctx.getArgument("id", String.class), player.getLocation());
             switch (result.status()) {
-              case ValueObjectMutationResult.MUTATED_STATUS -> player.sendMessage(Component.text("The home-point has been updated.").color(NamedTextColor.GREEN));
-              case ValueObjectMutationResult.UNCHANGED_STATUS -> player.sendMessage(Component.text("The location is the same.").color(NamedTextColor.RED));
-              case ValueObjectMutationResult.ERROR_STATUS -> player.sendMessage(Component.text("The home-point doesn't exist.").color(NamedTextColor.RED));
+              case ValueObjectMutationResult.MUTATED_STATUS -> player.sendMessage(MiniMessageHelper.parse(messages.locationModified));
+              case ValueObjectMutationResult.UNCHANGED_STATUS -> player.sendMessage(MiniMessageHelper.parse(messages.locationModifyError));
+              case ValueObjectMutationResult.ERROR_STATUS -> player.sendMessage(MiniMessageHelper.parse(messages.unknownHome));
             }
             return Command.SINGLE_SUCCESS;
           })
