@@ -22,15 +22,16 @@ import io.github.aivruu.homes.api.application.Homes;
 import io.github.aivruu.homes.api.application.HomesProvider;
 import io.github.aivruu.homes.command.application.AbstractRegistrableCommand;
 import io.github.aivruu.homes.command.application.HomeCommand;
-import io.github.aivruu.homes.config.infrastructure.ConfigurationContainer;
-import io.github.aivruu.homes.config.infrastructure.object.ConfigurationConfigurationModel;
-import io.github.aivruu.homes.config.infrastructure.object.MessagesConfigurationModel;
+import io.github.aivruu.homes.command.application.MainCommand;
+import io.github.aivruu.homes.config.application.ConfigurationContainer;
+import io.github.aivruu.homes.config.application.object.ConfigurationConfigurationModel;
+import io.github.aivruu.homes.config.application.object.MessagesConfigurationModel;
 import io.github.aivruu.homes.home.application.HomeCreatorService;
 import io.github.aivruu.homes.home.application.HomePositionUpdater;
 import io.github.aivruu.homes.home.application.registry.HomeAggregateRootRegistry;
 import io.github.aivruu.homes.home.domain.HomeAggregateRoot;
 import io.github.aivruu.homes.home.infrastructure.HomeCacheAggregateRootRepository;
-import io.github.aivruu.homes.listener.application.PlayerRegistryListener;
+import io.github.aivruu.homes.player.application.listener.PlayerRegistryListener;
 import io.github.aivruu.homes.persistence.domain.InfrastructureAggregateRootRepository;
 import io.github.aivruu.homes.persistence.infrastructure.ExecutorHelper;
 import io.github.aivruu.homes.persistence.infrastructure.InfrastructureRepositoryController;
@@ -167,19 +168,20 @@ public final class HomesPlugin extends JavaPlugin implements Homes {
     final InfrastructureAggregateRootRepository<PlayerAggregateRoot> playerInfrastructureAggregateRootRepository = this.infrastructureRepositoryController.playerInfrastructureAggregateRootRepository();
     this.playerAggregateRootRegistry = new PlayerAggregateRootRegistry(this.playerAggregateRootRepository, playerInfrastructureAggregateRootRepository);
     this.playerManagerService = new PlayerManagerService(this.playerAggregateRootRegistry);
-    this.playerHomeController = new PlayerHomeController(this.playerAggregateRootRegistry, this.homeAggregateRootRegistry);
+    this.playerHomeController = new PlayerHomeController(this.playerAggregateRootRegistry, this.playerManagerService);
 
     this.registerCommands(
+      new MainCommand(this.configurationModelContainer, this.messagesModelContainer),
       new HomeCommand(
-        this.configurationModelContainer.model(),
-        this.messagesModelContainer.model(),
+        this.configurationModelContainer,
+        this.messagesModelContainer,
         this.playerManagerService,
         this.playerHomeController,
         this.homeCreatorService,
         this.homePositionUpdater
       )
     );
-    super.getServer().getPluginManager().registerEvents(new PlayerRegistryListener(this.playerManagerService), this);
+    super.getServer().getPluginManager().registerEvents(new PlayerRegistryListener(this.logger, this.playerManagerService), this);
 
     this.logger.info("Plugin's API has been initialized.");
     HomesProvider.set(this);
@@ -200,9 +202,19 @@ public final class HomesPlugin extends JavaPlugin implements Homes {
   public void onDisable() {
     this.logger.info("Verifying cache aggregate-root repositories availability for data clean-up.");
     if (this.homeAggregateRootRepository != null) {
+      for (final HomeAggregateRoot homeAggregateRoot : this.homeAggregateRootRepository.findAllSync()) {
+        if (!this.homeAggregateRootRegistry.save(homeAggregateRoot)) {
+          this.logger.error("Home aggregate-root with id {} couldn't be saved in the infrastructure.", homeAggregateRoot.id());
+        }
+      }
       this.homeAggregateRootRepository.clearSync();
     }
     if (this.playerAggregateRootRepository != null) {
+      for (final PlayerAggregateRoot playerAggregateRoot : this.playerAggregateRootRepository.findAllSync()) {
+        if (!this.playerAggregateRootRegistry.save(playerAggregateRoot)) {
+          this.logger.error("Player aggregate-root with id {} couldn't be saved in the infrastructure.", playerAggregateRoot.id());
+        }
+      }
       this.playerAggregateRootRepository.clearSync();
     }
     if (this.infrastructureRepositoryController != null) {
