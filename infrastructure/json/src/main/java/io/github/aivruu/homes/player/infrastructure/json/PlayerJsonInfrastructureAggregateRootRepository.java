@@ -32,7 +32,7 @@ public final class PlayerJsonInfrastructureAggregateRootRepository extends Infra
   private final Path directory;
 
   public PlayerJsonInfrastructureAggregateRootRepository(final @NotNull Path directory) {
-    super(ExecutorHelper.executorPool());
+    super(ExecutorHelper.pool());
     this.directory = directory;
   }
 
@@ -73,12 +73,10 @@ public final class PlayerJsonInfrastructureAggregateRootRepository extends Infra
         try {
           Files.createFile(file);
         } catch (final IOException exception) {
-          exception.printStackTrace();
           return false;
         }
       }
-      JsonCodecHelper.write(file, aggregateRoot);
-      return true;
+      return JsonCodecHelper.write(file, aggregateRoot);
     }, super.executor);
   }
 
@@ -86,16 +84,15 @@ public final class PlayerJsonInfrastructureAggregateRootRepository extends Infra
   public @NotNull CompletableFuture<Boolean> deleteAsync(final @NotNull String id) {
     return CompletableFuture.supplyAsync(() -> {
       final Path file = this.directory.resolve(id + ".json");
-      if (Files.exists(file)) {
-        try {
-          Files.delete(file);
-          return true;
-        } catch (final IOException exception) {
-          exception.printStackTrace();
-          return false;
-        }
+      if (Files.notExists(file)) {
+        return false;
       }
-      return false;
+      try {
+        Files.delete(file);
+        return true;
+      } catch (final IOException exception) {
+        return false;
+      }
     }, super.executor);
   }
 }
