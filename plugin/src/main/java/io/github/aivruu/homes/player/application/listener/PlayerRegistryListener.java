@@ -14,9 +14,12 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
-package io.github.aivruu.homes.listener.application;
+package io.github.aivruu.homes.player.application.listener;
 
 import io.github.aivruu.homes.player.application.PlayerManagerService;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
@@ -24,19 +27,25 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.jetbrains.annotations.NotNull;
 
 public final class PlayerRegistryListener implements Listener {
+  private final ComponentLogger logger;
   private final PlayerManagerService playerManagerService;
 
-  public PlayerRegistryListener(final @NotNull PlayerManagerService playerManagerService) {
+  public PlayerRegistryListener(final @NotNull ComponentLogger logger, final @NotNull PlayerManagerService playerManagerService) {
+    this.logger = logger;
     this.playerManagerService = playerManagerService;
   }
 
   @EventHandler
   public void onAsyncPreLogin(final @NotNull AsyncPlayerPreLoginEvent event) {
-    this.playerManagerService.loadOne(event.getUniqueId().toString());
+    if (!this.playerManagerService.loadOne(event.getUniqueId().toString())) {
+      this.logger.error(Component.text("This player's information seems already loaded.").color(NamedTextColor.YELLOW));
+    }
   }
 
   @EventHandler
   public void onQuit(final @NotNull PlayerQuitEvent event) {
-    this.playerManagerService.unloadOne(event.getPlayer().getUniqueId().toString());
+    if (!this.playerManagerService.unloadOne(event.getPlayer().getUniqueId().toString())) {
+      this.logger.error(Component.text("This player's information couldn't be saved").color(NamedTextColor.YELLOW));
+    }
   }
 }
