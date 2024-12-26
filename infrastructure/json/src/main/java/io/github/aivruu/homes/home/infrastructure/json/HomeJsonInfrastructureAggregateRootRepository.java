@@ -32,7 +32,7 @@ public final class HomeJsonInfrastructureAggregateRootRepository extends Infrast
   private final Path directory;
 
   public HomeJsonInfrastructureAggregateRootRepository(final @NotNull Path directory) {
-    super(ExecutorHelper.executorPool());
+    super(ExecutorHelper.pool());
     this.directory = directory;
   }
 
@@ -73,7 +73,6 @@ public final class HomeJsonInfrastructureAggregateRootRepository extends Infrast
         try {
           Files.createFile(file);
         } catch (final IOException exception) {
-          exception.printStackTrace();
           return false;
         }
       }

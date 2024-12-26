@@ -38,7 +38,7 @@ public final class PlayerMongoInfrastructureAggregateRootRepository extends Infr
     final @NotNull MongoClient client,
     final @NotNull String databaseName,
     final @NotNull String collectionName) {
-    super(ExecutorHelper.executorPool());
+    super(ExecutorHelper.pool());
     this.client = client;
     this.databaseName = databaseName;
     this.collectionName = collectionName;
