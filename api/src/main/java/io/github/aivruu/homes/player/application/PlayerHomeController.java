@@ -19,7 +19,6 @@ package io.github.aivruu.homes.player.application;
 import io.github.aivruu.homes.aggregate.domain.registry.AggregateRootRegistry;
 import io.github.aivruu.homes.home.domain.event.HomeCreateEvent;
 import io.github.aivruu.homes.home.domain.event.HomeDeleteEvent;
-import io.github.aivruu.homes.home.domain.HomeAggregateRoot;
 import io.github.aivruu.homes.home.domain.HomeModelEntity;
 import io.github.aivruu.homes.home.domain.position.HomePositionValueObject;
 import io.github.aivruu.homes.player.domain.PlayerAggregateRoot;
@@ -35,20 +34,17 @@ import org.jetbrains.annotations.NotNull;
  */
 public final class PlayerHomeController {
   private final AggregateRootRegistry<PlayerAggregateRoot> playerAggregateRootRegistry;
-  private final AggregateRootRegistry<HomeAggregateRoot> homeAggregateRootRegistry;
+  private final PlayerManagerService playerManagerService;
 
   /**
    * Creates a new {@link PlayerHomeController} with the provided parameters.
    *
-   * @param playerAggregateRootRegistry the {@link io.github.aivruu.homes.player.application.registry.PlayerAggregateRootRegistry}.
-   * @param homeAggregateRootRegistry the {@link io.github.aivruu.homes.home.application.registry.HomeAggregateRootRegistry}.
+   * @param playerManagerService the {@link PlayerManagerService}.
    * @since 2.0.0
    */
-  public PlayerHomeController(
-    final @NotNull AggregateRootRegistry<PlayerAggregateRoot> playerAggregateRootRegistry,
-    final @NotNull AggregateRootRegistry<HomeAggregateRoot> homeAggregateRootRegistry) {
+  public PlayerHomeController(final @NotNull AggregateRootRegistry<PlayerAggregateRoot> playerAggregateRootRegistry, final @NotNull PlayerManagerService playerManagerService) {
     this.playerAggregateRootRegistry = playerAggregateRootRegistry;
-    this.homeAggregateRootRegistry = homeAggregateRootRegistry;
+    this.playerManagerService = playerManagerService;
   }
 
   /**
@@ -62,11 +58,7 @@ public final class PlayerHomeController {
    * @since 2.0.0
    */
   public boolean addHome(final @NotNull Player player, final @NotNull HomeModelEntity homeModel) {
-    final String playerId = player.getUniqueId().toString();
-    if (!homeModel.ownerId().equals(playerId)) {
-      return false;
-    }
-    final PlayerAggregateRoot playerAggregateRoot = this.playerAggregateRootRegistry.findInCache(player.getUniqueId().toString());
+    final PlayerAggregateRoot playerAggregateRoot = this.playerManagerService.playerAggregateRootOf(player.getUniqueId().toString());
     if (playerAggregateRoot == null) {
       return false;
     }
@@ -79,15 +71,12 @@ public final class PlayerHomeController {
     final HomeModelEntity[] newHomes = new HomeModelEntity[homes.length + 1];
     byte i = 0;
     for (; i < homes.length; i++) {
-      if (homes[i].id().equals(homeModel.id())) {
-        return false;
-      }
+      if (homes[i].id().equals(homeModel.id())) return false;
       newHomes[i] = homes[i];
     }
     newHomes[i] = homeModel;
-    System.arraycopy(homes, 0, newHomes, i + 1, homes.length - i);
     playerAggregateRoot.homes(newHomes);
-    return true;
+    return this.playerAggregateRootRegistry.save(playerAggregateRoot);
   }
 
   /**
@@ -101,7 +90,7 @@ public final class PlayerHomeController {
    * @since 2.0.0
    */
   public boolean removeHome(final @NotNull Player player, final @NotNull String homeId) {
-    final PlayerAggregateRoot playerAggregateRoot = this.playerAggregateRootRegistry.findInCache(player.getUniqueId().toString());
+    final PlayerAggregateRoot playerAggregateRoot = this.playerManagerService.playerAggregateRootOf(player.getUniqueId().toString());
     if (playerAggregateRoot == null) {
       return false;
     }
@@ -112,9 +101,12 @@ public final class PlayerHomeController {
     final HomeModelEntity[] homes = playerAggregateRoot.homes();
     Bukkit.getPluginManager().callEvent(new HomeDeleteEvent(player, homeId));
     final HomeModelEntity[] newHomes = new HomeModelEntity[homes.length - 1];
-    System.arraycopy(homes, 0, newHomes, 0, homes.length);
+    for (byte i = 0; i < homes.length; i++) {
+      if (homes[i].id().equals(homeId)) continue;
+      newHomes[i] = homes[i];
+    }
     playerAggregateRoot.homes(newHomes);
-    return true;
+    return this.playerAggregateRootRegistry.save(playerAggregateRoot);
   }
 
   /**
@@ -128,7 +120,7 @@ public final class PlayerHomeController {
    * @since 2.0.0
    */
   public boolean teleportToHome(final @NotNull Player player, final @NotNull String homeId) {
-    final PlayerAggregateRoot playerAggregateRoot = this.playerAggregateRootRegistry.findInCache(player.getUniqueId().toString());
+    final PlayerAggregateRoot playerAggregateRoot = this.playerManagerService.playerAggregateRootOf(player.getUniqueId().toString());
     if (playerAggregateRoot == null) {
       return false;
     }
