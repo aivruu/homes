@@ -20,6 +20,7 @@ import io.github.aivruu.homes.aggregate.domain.registry.AggregateRootRegistry;
 import io.github.aivruu.homes.home.domain.HomeModelEntity;
 import io.github.aivruu.homes.player.domain.PlayerAggregateRoot;
 import io.github.aivruu.homes.player.domain.PlayerModelEntity;
+import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -29,15 +30,18 @@ import org.jetbrains.annotations.Nullable;
  * @since 2.0.0
  */
 public final class PlayerManagerService {
+  private final ComponentLogger logger;
   private final AggregateRootRegistry<PlayerAggregateRoot> playerAggregateRootRegistry;
 
   /**
    * Creates a new {@link PlayerManagerService} with the provided parameters.
    *
+   * @param logger the logger used for information and error messages.
    * @param playerAggregateRootRegistry the {@link io.github.aivruu.homes.player.application.registry.PlayerAggregateRootRegistry}.
    * @since 2.0.0
    */
-  public PlayerManagerService(final @NotNull AggregateRootRegistry<PlayerAggregateRoot> playerAggregateRootRegistry) {
+  public PlayerManagerService(final @NotNull ComponentLogger logger, final @NotNull AggregateRootRegistry<PlayerAggregateRoot> playerAggregateRootRegistry) {
+    this.logger = logger;
     this.playerAggregateRootRegistry = playerAggregateRootRegistry;
   }
 
@@ -57,14 +61,32 @@ public final class PlayerManagerService {
    *
    * @param id the player's id.
    * @return Whether the information was loaded correctly.
+   * @see io.github.aivruu.homes.player.application.registry.PlayerAggregateRootRegistry#findInInfrastructure(String)
    * @since 2.0.0
    */
   public boolean loadOne(final @NotNull String id) {
     PlayerAggregateRoot playerAggregateRoot = this.playerAggregateRootRegistry.findInInfrastructure(id);
-    if (playerAggregateRoot == null) {
-      playerAggregateRoot = new PlayerAggregateRoot(new PlayerModelEntity(id, new HomeModelEntity[0]));
+    if (playerAggregateRoot != null) {
+      this.playerAggregateRootRegistry.register(playerAggregateRoot);
+      return true;
     }
-    return this.playerAggregateRootRegistry.registerAndSave(playerAggregateRoot);
+    playerAggregateRoot = new PlayerAggregateRoot(new PlayerModelEntity(id, new HomeModelEntity[0]));
+    this.playerAggregateRootRegistry.register(playerAggregateRoot);
+    this.handleAggregateRootSave(playerAggregateRoot);
+    return true;
+  }
+
+  public void handleAggregateRootSave(final @NotNull PlayerAggregateRoot playerAggregateRoot) {
+    this.playerAggregateRootRegistry.save(playerAggregateRoot)
+      .thenAccept(wasSaved -> {
+        if (!wasSaved) {
+          this.logger.warn("The player's aggregate-root couldn't be saved into infrastructure.");
+        }
+      })
+      .exceptionally(exception -> {
+        this.logger.error("An error occurred while saving the player's aggregate-root.", exception);
+        return null;
+      });
   }
 
   /**
@@ -72,9 +94,15 @@ public final class PlayerManagerService {
    *
    * @param id the player's id.
    * @return Whether the information was unloaded and saved.
+   * @see io.github.aivruu.homes.player.application.registry.PlayerAggregateRootRegistry#unregister(String)
    * @since 2.0.0
    */
   public boolean unloadOne(final @NotNull String id) {
-    return this.playerAggregateRootRegistry.unregisterAndSave(id);
+    final PlayerAggregateRoot playerAggregateRoot = this.playerAggregateRootRegistry.unregister(id);
+    if (playerAggregateRoot == null) {
+      return false;
+    }
+    this.handleAggregateRootSave(playerAggregateRoot);
+    return true;
   }
 }
