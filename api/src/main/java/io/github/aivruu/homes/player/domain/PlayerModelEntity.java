@@ -63,9 +63,7 @@ public final class PlayerModelEntity {
    */
   @Nullable HomeModelEntity home(final @NotNull String home) {
     for (byte i = 0; i < this.homes.length; i++) {
-      if (!this.homes[i].id().equals(home)) {
-        continue;
-      }
+      if (this.homes[i] == null || !this.homes[i].id().equals(home)) continue;
       return this.homes[i];
     }
     return null;
