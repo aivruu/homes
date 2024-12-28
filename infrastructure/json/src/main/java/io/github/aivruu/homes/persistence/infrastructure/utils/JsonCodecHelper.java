@@ -18,13 +18,12 @@ package io.github.aivruu.homes.persistence.infrastructure.utils;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonIOException;
 import io.github.aivruu.homes.aggregate.domain.AggregateRoot;
-import io.github.aivruu.homes.home.domain.HomeAggregateRoot;
 import io.github.aivruu.homes.home.domain.HomeModelEntity;
 import io.github.aivruu.homes.home.domain.position.HomePositionValueObject;
-import io.github.aivruu.homes.home.infrastructure.json.codec.JsonHomeAggregateRootCodec;
-import io.github.aivruu.homes.home.infrastructure.json.codec.JsonHomeModelEntityCodec;
-import io.github.aivruu.homes.home.infrastructure.json.codec.JsonHomePositionValueObjectCodec;
+import io.github.aivruu.homes.home.infrastructure.json.JsonHomeModelEntityCodec;
+import io.github.aivruu.homes.home.infrastructure.json.JsonHomePositionValueObjectCodec;
 import io.github.aivruu.homes.player.domain.PlayerAggregateRoot;
 import io.github.aivruu.homes.player.infrastructure.json.codec.JsonPlayerAggregateRootCodec;
 import org.jetbrains.annotations.NotNull;
@@ -40,7 +39,6 @@ public final class JsonCodecHelper {
   private static final Gson GSON = new GsonBuilder()
     .registerTypeAdapter(PlayerAggregateRoot.class, JsonPlayerAggregateRootCodec.INSTANCE)
     .registerTypeAdapter(HomeModelEntity.class, JsonHomeModelEntityCodec.INSTANCE)
-    .registerTypeAdapter(HomeAggregateRoot.class, JsonHomeAggregateRootCodec.INSTANCE)
     .registerTypeAdapter(HomePositionValueObject.class, JsonHomePositionValueObjectCodec.INSTANCE)
     .setPrettyPrinting()
     .create();
@@ -53,7 +51,6 @@ public final class JsonCodecHelper {
     try (final Reader reader = Files.newBufferedReader(file)) {
       return GSON.fromJson(reader, aggregateRootClass);
     } catch (final IOException exception) {
-      exception.printStackTrace();
       return null;
     }
   }
@@ -62,8 +59,7 @@ public final class JsonCodecHelper {
     try (final Writer writer = Files.newBufferedWriter(file)) {
       GSON.toJson(aggregateRoot, writer);
       return true;
-    } catch (final IOException exception) {
-      exception.printStackTrace();
+    } catch (final IOException | JsonIOException exception) {
       return false;
     }
   }
