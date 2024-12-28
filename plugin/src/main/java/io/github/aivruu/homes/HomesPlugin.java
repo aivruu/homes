@@ -28,9 +28,6 @@ import io.github.aivruu.homes.config.application.object.ConfigurationConfigurati
 import io.github.aivruu.homes.config.application.object.MessagesConfigurationModel;
 import io.github.aivruu.homes.home.application.HomeCreatorService;
 import io.github.aivruu.homes.home.application.HomePositionUpdater;
-import io.github.aivruu.homes.home.application.registry.HomeAggregateRootRegistry;
-import io.github.aivruu.homes.home.domain.HomeAggregateRoot;
-import io.github.aivruu.homes.home.infrastructure.HomeCacheAggregateRootRepository;
 import io.github.aivruu.homes.player.application.listener.PlayerRegistryListener;
 import io.github.aivruu.homes.persistence.domain.InfrastructureAggregateRootRepository;
 import io.github.aivruu.homes.persistence.infrastructure.ExecutorHelper;
@@ -53,9 +50,7 @@ public final class HomesPlugin extends JavaPlugin implements Homes {
   private final ComponentLogger logger = super.getComponentLogger();
   private @Nullable ConfigurationContainer<ConfigurationConfigurationModel> configurationModelContainer;
   private @Nullable ConfigurationContainer<MessagesConfigurationModel> messagesModelContainer;
-  private AggregateRootRepository<HomeAggregateRoot> homeAggregateRootRepository;
   private AggregateRootRepository<PlayerAggregateRoot> playerAggregateRootRepository;
-  private AggregateRootRegistry<HomeAggregateRoot> homeAggregateRootRegistry;
   private HomeCreatorService homeCreatorService;
   private HomePositionUpdater homePositionUpdater;
   private AggregateRootRegistry<PlayerAggregateRoot> playerAggregateRootRegistry;
@@ -72,27 +67,11 @@ public final class HomesPlugin extends JavaPlugin implements Homes {
   }
 
   @Override
-  public @NotNull AggregateRootRepository<HomeAggregateRoot> homeCacheRepository() {
-    if (this.homeAggregateRootRepository == null) {
-      throw new IllegalStateException("Home aggregate-root repository is not available yet.");
-    }
-    return this.homeAggregateRootRepository;
-  }
-
-  @Override
   public @NotNull AggregateRootRegistry<PlayerAggregateRoot> playerRegistry() {
     if (this.playerAggregateRootRegistry == null) {
       throw new IllegalStateException("Player aggregate-root registry is not available yet.");
     }
     return this.playerAggregateRootRegistry;
-  }
-
-  @Override
-  public @NotNull AggregateRootRegistry<HomeAggregateRoot> homeRegistry() {
-    if (this.homeAggregateRootRegistry == null) {
-      throw new IllegalStateException("Home aggregate-root registry is not available yet.");
-    }
-    return this.homeAggregateRootRegistry;
   }
 
   @Override
@@ -147,28 +126,24 @@ public final class HomesPlugin extends JavaPlugin implements Homes {
       return;
     }
     // Thread-pool creation before infrastructure-repositories initialization
-    ExecutorHelper.createPool(this.configurationModelContainer.model().threadsPoolSize);
-    this.logger.info("Initializing infrastructure-repository controller and selecting repositories implementations.");
+    ExecutorHelper.createPool(this.configurationModelContainer.model().threadPoolSize);
+    this.logger.info("Initializing infrastructure-repository controller and selecting repository implementation.");
     this.infrastructureRepositoryController = new InfrastructureRepositoryController(super.getDataPath(), this.configurationModelContainer.model());
     if (!this.infrastructureRepositoryController.selectAndInitialize()) {
       this.logger.error("""
-        Repository controller couldn't initialize the required infrastructure-repositories implementations.
+        Repository controller couldn't initialize the required infrastructure-repository implementation.
         The plugin won't start correctly.""");
       return;
     }
-
-    this.logger.info("Initializing infrastructure and application classes for homes management.");
-    // Infrastructure-repositories shouldn't be null at this point.
-    final InfrastructureAggregateRootRepository<HomeAggregateRoot> homeInfrastructureAggregateRootRepository = this.infrastructureRepositoryController.homeInfrastructureAggregateRootRepository();
-    this.homeAggregateRootRepository = new HomeCacheAggregateRootRepository(this.homeAggregateRootRegistry);
-    this.homeAggregateRootRegistry = new HomeAggregateRootRegistry(this.homeAggregateRootRepository, homeInfrastructureAggregateRootRepository);
-    this.homeCreatorService = new HomeCreatorService(this.homeAggregateRootRegistry);
-    this.homePositionUpdater = new HomePositionUpdater(this.homeAggregateRootRegistry);
-    this.logger.info("Initializing infrastructure and application classes for players management.");
+    this.logger.info("Initializing registry and application services for players management.");
     final InfrastructureAggregateRootRepository<PlayerAggregateRoot> playerInfrastructureAggregateRootRepository = this.infrastructureRepositoryController.playerInfrastructureAggregateRootRepository();
     this.playerAggregateRootRegistry = new PlayerAggregateRootRegistry(this.playerAggregateRootRepository, playerInfrastructureAggregateRootRepository);
-    this.playerManagerService = new PlayerManagerService(this.playerAggregateRootRegistry);
-    this.playerHomeController = new PlayerHomeController(this.playerAggregateRootRegistry, this.playerManagerService);
+    this.playerManagerService = new PlayerManagerService(this.logger, this.playerAggregateRootRegistry);
+    this.playerHomeController = new PlayerHomeController(this.playerAggregateRootRegistry);
+
+    this.logger.info("Initializing application services for homes management.");
+    this.homePositionUpdater = new HomePositionUpdater(this.playerAggregateRootRegistry);
+    this.homeCreatorService = new HomeCreatorService(this.playerAggregateRootRegistry, this.playerHomeController);
 
     this.registerCommands(
       new MainCommand(this.configurationModelContainer, this.messagesModelContainer),
@@ -200,24 +175,15 @@ public final class HomesPlugin extends JavaPlugin implements Homes {
 
   @Override
   public void onDisable() {
-    this.logger.info("Verifying cache aggregate-root repositories availability for data clean-up.");
-    if (this.homeAggregateRootRepository != null) {
-      for (final HomeAggregateRoot homeAggregateRoot : this.homeAggregateRootRepository.findAllSync()) {
-        if (!this.homeAggregateRootRegistry.save(homeAggregateRoot)) {
-          this.logger.error("Home aggregate-root with id {} couldn't be saved in the infrastructure.", homeAggregateRoot.id());
-        }
-      }
-      this.homeAggregateRootRepository.clearSync();
-    }
+    this.logger.info("Verifying cache aggregate-root repositories availability for data saving and clean.");
     if (this.playerAggregateRootRepository != null) {
       for (final PlayerAggregateRoot playerAggregateRoot : this.playerAggregateRootRepository.findAllSync()) {
-        if (!this.playerAggregateRootRegistry.save(playerAggregateRoot)) {
-          this.logger.error("Player aggregate-root with id {} couldn't be saved in the infrastructure.", playerAggregateRoot.id());
-        }
+        this.playerManagerService.handleAggregateRootSave(playerAggregateRoot);
       }
       this.playerAggregateRootRepository.clearSync();
     }
     if (this.infrastructureRepositoryController != null) {
+      this.logger.info("Closing infrastructure repository-controller.");
       this.infrastructureRepositoryController.close();
     }
   }
