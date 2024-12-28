@@ -21,6 +21,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * This interface defines the set of methods that subclasses must implement to perform
@@ -96,23 +97,22 @@ public interface AggregateRootRegistry<A extends AggregateRoot> {
   boolean existsInInfrastructure(final @NotNull String id);
 
   /**
-   * Loads the given {@link AggregateRoot} into cache and saves it at the infrastructure.
+   * Stores the given {@link AggregateRoot} into cache.
    *
-   * @param aggregateRoot the {@link AggregateRoot} to register.
-   * @return Whether the aggregate-root was registered and saved correctly.
+   * @param aggregateRoot the {@link AggregateRoot} to store.
    * @since 2.0.0
    */
-  boolean registerAndSave(final @NotNull A aggregateRoot);
+  void register(final @NotNull A aggregateRoot);
 
   /**
-   * Unregisters the {@link AggregateRoot} specified from the cache and saves it in the
-   * infrastructure.
+   * Removes the {@link AggregateRoot} mapping from cache-repository and return
+   * its reference.
    *
    * @param id the aggregate-root's identifier.
-   * @return Whether the aggregate-root was unregistered and saved.
+   * @return The {@link AggregateRoot} or {@code null} if no found.
    * @since 2.0.0
    */
-  boolean unregisterAndSave(final @NotNull String id);
+  @Nullable A unregister(final @NotNull String id);
 
   /**
    * Saves the given {@link AggregateRoot} into the infrastructure and returns a
@@ -122,15 +122,5 @@ public interface AggregateRootRegistry<A extends AggregateRoot> {
    * @return Whether the aggregate-root was saved correctly.
    * @since 2.0.0
    */
-  boolean save(final @NotNull A aggregateRoot);
-
-  /**
-   * Deletes the aggregate-root specified from the cache (if it is cached) and from
-   * the infrastructure.
-   *
-   * @param id the aggregate-root's identifier.
-   * @return Whether the aggregate-root was fully deleted successfully.
-   * @since 2.0.0
-   */
-  boolean unregisterGlobally(final @NotNull String id);
+  @NotNull CompletableFuture<Boolean> save(final @NotNull A aggregateRoot);
 }
