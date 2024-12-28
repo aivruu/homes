@@ -80,31 +80,6 @@ public final class PlayerModelEntity {
   }
 
   /**
-   * Returns a {@link HomeModelEntity} from the homes-array based on the provided home-id.
-   *
-   * @param home the home to search.
-   * @return The {@link HomeModelEntity} or {@code null} if not exists.
-   * @since 2.0.0
-   */
-  @Nullable HomeModelEntity indexOfHome(final @NotNull String home) {
-    byte start = 0;
-    byte end = (byte) (this.homes.length - 1);
-
-    while (start <= end) {
-      final int mid = start + (end - start) >>> 1;
-      final int comparison = homes[mid].id().compareTo(home);
-      if (comparison == 0) {
-        return homes[mid];
-      } else if (comparison < 0) {
-        start = (byte) (mid + 1);
-      } else {
-        end = (byte) (mid - 1);
-      }
-    }
-    return null;
-  }
-
-  /**
    * Sets a new {@link HomeModelEntity} array for this player.
    *
    * @param homes the new homes array.
