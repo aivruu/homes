@@ -33,7 +33,6 @@ public final class HomesPluginLoader implements PluginLoader {
     libraryResolver.addDependency(new Dependency(new DefaultArtifact("org.spongepowered:configurate-hocon:4.1.2"), null));
     libraryResolver.addDependency(new Dependency(new DefaultArtifact("org.mongodb:mongodb-driver-sync:5.2.0"), null));
     libraryResolver.addDependency(new Dependency(new DefaultArtifact("com.google.code.gson:gson:2.11.0"), null));
-    libraryResolver.addDependency(new Dependency(new DefaultArtifact("com.github.ben-manes.caffeine:caffeine:3.1.8"), null));
     classpathBuilder.addLibrary(libraryResolver);
   }
 }
