@@ -18,15 +18,15 @@ package io.github.aivruu.homes.player.infrastructure;
 
 import io.github.aivruu.homes.aggregate.domain.repository.AggregateRootRepository;
 import io.github.aivruu.homes.player.domain.PlayerAggregateRoot;
+import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
 public final class PlayerCacheAggregateRootRepository implements AggregateRootRepository<PlayerAggregateRoot> {
-  private final Map<String, PlayerAggregateRoot> cache = new HashMap<>();
+  private final Object2ObjectMap<String, PlayerAggregateRoot> cache = new Object2ObjectOpenHashMap<>();
 
   @Override
   public @Nullable PlayerAggregateRoot findSync(final @NotNull String id) {
