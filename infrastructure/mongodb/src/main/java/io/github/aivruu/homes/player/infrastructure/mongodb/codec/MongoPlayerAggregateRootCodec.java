@@ -17,7 +17,7 @@
 package io.github.aivruu.homes.player.infrastructure.mongodb.codec;
 
 import io.github.aivruu.homes.home.domain.HomeModelEntity;
-import io.github.aivruu.homes.home.infrastructure.mongodb.codec.MongoHomeModelEntityCodec;
+import io.github.aivruu.homes.home.infrastructure.mongodb.MongoHomeModelEntityCodec;
 import io.github.aivruu.homes.player.domain.PlayerAggregateRoot;
 import io.github.aivruu.homes.player.domain.PlayerModelEntity;
 import org.bson.BsonReader;
@@ -49,6 +49,7 @@ public enum MongoPlayerAggregateRootCodec implements Codec<PlayerAggregateRoot> 
     writer.writeString("id", playerAggregateRoot.id());
     writer.writeStartArray("homes");
     for (final HomeModelEntity homeModel : playerAggregateRoot.homes()) {
+      if (homeModel == null) continue;
       encoderContext.encodeWithChildContext(MongoHomeModelEntityCodec.INSTANCE, writer, homeModel);
     }
     writer.writeEndArray();

@@ -27,6 +27,7 @@ import com.google.gson.JsonSerializer;
 import io.github.aivruu.homes.home.domain.HomeModelEntity;
 import io.github.aivruu.homes.player.domain.PlayerAggregateRoot;
 import io.github.aivruu.homes.player.domain.PlayerModelEntity;
+import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -36,23 +37,25 @@ public enum JsonPlayerAggregateRootCodec implements JsonSerializer<PlayerAggrega
   INSTANCE;
 
   @Override
-  public PlayerAggregateRoot deserialize(final JsonElement json, final Type type, final JsonDeserializationContext ctx) throws JsonParseException {
+  public @NotNull PlayerAggregateRoot deserialize(final JsonElement json, final Type type, final JsonDeserializationContext ctx) throws JsonParseException {
     final JsonObject jsonObject = json.getAsJsonObject();
     final List<HomeModelEntity> homesList = new ArrayList<>();
     for (final JsonElement homeElement : jsonObject.getAsJsonArray("homes")) {
       homesList.add(ctx.deserialize(homeElement, HomeModelEntity.class));
     }
-    final PlayerModelEntity playerModel = new PlayerModelEntity(jsonObject.get("id").getAsString(), homesList.toArray(HomeModelEntity[]::new));
-    return new PlayerAggregateRoot(playerModel);
+    return new PlayerAggregateRoot(
+      new PlayerModelEntity(jsonObject.get("id").getAsString(), homesList.toArray(HomeModelEntity[]::new))
+    );
   }
 
   @Override
-  public JsonElement serialize(final PlayerAggregateRoot playerAggregateRoot, final Type type, final JsonSerializationContext ctx) {
+  public @NotNull JsonElement serialize(final PlayerAggregateRoot playerAggregateRoot, final Type type, final JsonSerializationContext ctx) {
     final JsonObject jsonObject = new JsonObject();
     jsonObject.addProperty("id", playerAggregateRoot.id());
     final HomeModelEntity[] homes = playerAggregateRoot.homes();
     final JsonArray jsonArray = new JsonArray(homes.length);
     for (final HomeModelEntity homeModel : homes) {
+      if (homeModel == null) continue;
       jsonArray.add(ctx.serialize(homeModel, HomeModelEntity.class));
     }
     jsonObject.add("homes", jsonArray);
