@@ -55,7 +55,7 @@ public final class MainCommand extends AbstractRegistrableCommand {
           final MessagesConfigurationModel messages = super.messages.model();
           super.configuration = super.configuration.reload();
           super.messages = super.messages.reload();
-          if (super.configuration == null || super.messages == null) {
+          if (super.configuration != null || super.messages != null) {
             sender.sendMessage(MiniMessageHelper.parse(messages.reloadSuccess));
           } else {
             sender.sendMessage(MiniMessageHelper.parse(messages.reloadError));
