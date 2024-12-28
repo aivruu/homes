@@ -17,10 +17,10 @@
 package io.github.aivruu.homes.home.application;
 
 import io.github.aivruu.homes.aggregate.domain.registry.AggregateRootRegistry;
-import io.github.aivruu.homes.aggregate.domain.repository.AggregateRootRepository;
+import io.github.aivruu.homes.home.domain.HomeModelEntity;
 import io.github.aivruu.homes.home.domain.event.HomePositionUpdateEvent;
-import io.github.aivruu.homes.home.domain.HomeAggregateRoot;
 import io.github.aivruu.homes.home.domain.position.HomePositionValueObject;
+import io.github.aivruu.homes.player.domain.PlayerAggregateRoot;
 import io.github.aivruu.homes.result.domain.ValueObjectMutationResult;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -35,10 +35,10 @@ import org.jetbrains.annotations.Nullable;
  * @since 2.0.0
  */
 public final class HomePositionUpdater {
-  private final AggregateRootRegistry<HomeAggregateRoot> homeAggregateRootRegistry;
+  private final AggregateRootRegistry<PlayerAggregateRoot> playerAggregateRootRegistry;
 
-  public HomePositionUpdater(final @NotNull AggregateRootRegistry<HomeAggregateRoot> homeAggregateRootRegistry) {
-    this.homeAggregateRootRegistry = homeAggregateRootRegistry;
+  public HomePositionUpdater(final @NotNull AggregateRootRegistry<PlayerAggregateRoot> playerAggregateRootRegistry) {
+    this.playerAggregateRootRegistry = playerAggregateRootRegistry;
   }
 
   /**
@@ -54,7 +54,7 @@ public final class HomePositionUpdater {
    * <li>{@link ValueObjectMutationResult#unchanged()} if the position given is the same, or event is cancelled. {@link ValueObjectMutationResult#result()} is {@code null}.</li>
    * <li>{@link ValueObjectMutationResult#error()} if the home doesn't exist. {@link ValueObjectMutationResult#result()} is {@code null}.</li>
    * </ul>
-   * @see io.github.aivruu.homes.home.application.registry.HomeAggregateRootRegistry#findInBoth(String)
+   * @see io.github.aivruu.homes.player.application.registry.PlayerAggregateRootRegistry#findInCache(String)
    * @since 1.0.0
    */
   public @NotNull ValueObjectMutationResult<@Nullable HomePositionValueObject> updatePosition(
@@ -62,13 +62,17 @@ public final class HomePositionUpdater {
     final @NotNull String homeId,
     final @NotNull Location newLocation
   ) {
-    final HomeAggregateRoot homeAggregateRoot = this.homeAggregateRootRegistry.findInBoth(homeId);
-    if (homeAggregateRoot == null) {
+    final PlayerAggregateRoot playerAggregateRoot = this.playerAggregateRootRegistry.findInCache(player.getUniqueId().toString());
+    if (playerAggregateRoot == null) {
+      return ValueObjectMutationResult.error();
+    }
+    final HomeModelEntity homeModel = playerAggregateRoot.home(homeId);
+    if (homeModel == null) {
       return ValueObjectMutationResult.error();
     }
     // Get current home's position (location), and make some checks to avoid unnecessary updates if the
     // location has no changes.
-    final HomePositionValueObject homePosition = homeAggregateRoot.position();
+    final HomePositionValueObject homePosition = homeModel.position();
     final int x = newLocation.getBlockX();
     final int y = newLocation.getBlockY();
     final int z = newLocation.getBlockZ();
@@ -77,13 +81,12 @@ public final class HomePositionUpdater {
     }
     // Position-updating event firing process.
     final HomePositionValueObject newPosition = new HomePositionValueObject(x, y, z);
-    final HomePositionUpdateEvent homePositionUpdateEvent = new HomePositionUpdateEvent(player, homeAggregateRoot, homePosition, newPosition);
+    final HomePositionUpdateEvent homePositionUpdateEvent = new HomePositionUpdateEvent(player, homeModel, homePosition, newPosition);
     Bukkit.getPluginManager().callEvent(homePositionUpdateEvent);
     if (homePositionUpdateEvent.isCancelled()) {
       return ValueObjectMutationResult.unchanged();
     }
-    // Update home's position and return the mutation-result.
-    homeAggregateRoot.position(newPosition);
+    homeModel.position(newPosition);
     return ValueObjectMutationResult.mutated(newPosition);
   }
 }
