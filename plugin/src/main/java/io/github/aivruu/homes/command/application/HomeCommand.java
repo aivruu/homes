@@ -132,11 +132,15 @@ public final class HomeCommand extends AbstractRegistrableCommand {
           .executes(ctx -> {
             final Player player = (Player) ctx.getSource().getSender();
             final MessagesConfigurationModel messages = super.messages.model();
-            final boolean wasTeleported = this.playerHomeController.teleportToHome(player, ctx.getArgument("id", String.class));
-            if (!wasTeleported) {
-              player.sendMessage(MiniMessageHelper.parse(messages.unknownHome));
-            } else {
-              player.sendMessage(MiniMessageHelper.parse(messages.teleported));
+            final byte teleportStatusCode = this.playerHomeController.teleportToHome(player, ctx.getArgument("id", String.class));
+            switch (teleportStatusCode) {
+              case PlayerHomeController.PLAYER_HOME_DOES_NOT_EXIST ->
+                player.sendMessage(MiniMessageHelper.parse(messages.unknownHome));
+              case PlayerHomeController.PLAYER_HOME_WORLD_IS_NOT_AVAILABLE ->
+                player.sendMessage(MiniMessageHelper.parse(messages.homeWorldUnavailable));
+              case PlayerHomeController.PLAYER_HOME_TELEPORT_VALID ->
+                player.sendMessage(MiniMessageHelper.parse(messages.teleported));
+              default -> player.sendMessage(MiniMessageHelper.parse(messages.playerUnknownInfo));
             }
             return Command.SINGLE_SUCCESS;
           })
@@ -150,7 +154,7 @@ public final class HomeCommand extends AbstractRegistrableCommand {
             final MessagesConfigurationModel messages = super.messages.model();
             final Player player = (Player) ctx.getSource().getSender();
             final ValueObjectMutationResult<HomePositionValueObject> result = this.homePositionUpdater.updatePosition(
-              player, ctx.getArgument("id", String.class), player.getLocation());
+              player, ctx.getArgument("id", String.class));
             switch (result.status()) {
               case ValueObjectMutationResult.MUTATED_STATUS ->
                 player.sendMessage(MiniMessageHelper.parse(messages.locationModified));
