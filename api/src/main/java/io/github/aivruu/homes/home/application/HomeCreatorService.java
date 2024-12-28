@@ -17,67 +17,51 @@
 package io.github.aivruu.homes.home.application;
 
 import io.github.aivruu.homes.aggregate.domain.registry.AggregateRootRegistry;
-import io.github.aivruu.homes.home.domain.HomeAggregateRoot;
 import io.github.aivruu.homes.home.domain.HomeModelEntity;
 import io.github.aivruu.homes.home.domain.position.HomePositionValueObject;
+import io.github.aivruu.homes.player.application.PlayerHomeController;
+import io.github.aivruu.homes.player.application.PlayerManagerService;
+import io.github.aivruu.homes.player.domain.PlayerAggregateRoot;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 /**
- * This service is used to proportionate homes creation and deletion operations.
+ * This service is used to proportionate {@link HomeModelEntity} creation for
+ * information provided by the user.
  *
  * @since 2.0.0
  */
 public final class HomeCreatorService {
-  private final AggregateRootRegistry<HomeAggregateRoot> homeAggregateRootRegistry;
+  private final AggregateRootRegistry<PlayerAggregateRoot> playerAggregateRootRegistry;
+  private final PlayerHomeController playerHomeController;
 
-  public HomeCreatorService(final @NotNull AggregateRootRegistry<HomeAggregateRoot> homeAggregateRootRegistry) {
-    this.homeAggregateRootRegistry = homeAggregateRootRegistry;
+  public HomeCreatorService(final @NotNull AggregateRootRegistry<PlayerAggregateRoot> playerAggregateRootRegistry, final @NotNull PlayerHomeController playerHomeController) {
+    this.playerAggregateRootRegistry = playerAggregateRootRegistry;
+    this.playerHomeController = playerHomeController;
   }
 
   /**
-   * Returns a {@link HomeAggregateRoot} for the specified id if exists.
-   *
-   * @param homeId the home's id.
-   * @return The {@link HomeAggregateRoot} or {@code null}.
-   * @since 2.0.0
-   */
-  public @Nullable HomeAggregateRoot homeAggregateRootOf(final @NotNull String homeId) {
-    return this.homeAggregateRootRegistry.findInBoth(homeId);
-  }
-
-  /**
-   * Creates a new home for the specified player and saves it into the {@link AggregateRootRegistry}
-   * for homes.
+   * Creates a new home for the specified player and saves it into player's homes-array.
    *
    * @param player the player who is creating the home.
    * @param homeId the home's id.
-   * @return The created {@link HomeModelEntity} if the home was registered and saved, otherwise {@code null}.
-   * @see io.github.aivruu.homes.home.application.registry.HomeAggregateRootRegistry#registerAndSave(HomeAggregateRoot)
+   * @return Whether the home was created correctly and doesn't exist previously.
+   * @see PlayerManagerService#playerAggregateRootOf(String)
+   * @see PlayerAggregateRoot#home(String)
    * @since 2.0.0
    */
-  public @Nullable HomeModelEntity create(final @NotNull Player player, final @NotNull String homeId) {
-    if (this.homeAggregateRootRegistry.existsGlobally(homeId)) {
-      return null;
+  public boolean create(final @NotNull Player player, final @NotNull String homeId) {
+    final PlayerAggregateRoot playerAggregateRoot = this.playerAggregateRootRegistry.findInCache(player.getUniqueId().toString());
+    if (playerAggregateRoot == null) {
+      return false;
+    }
+    if (playerAggregateRoot.home(homeId) != null) {
+      return false;
     }
     final Location at = player.getLocation();
-    final HomeModelEntity homeModel = new HomeModelEntity(
-      homeId, player.getUniqueId().toString(), new HomePositionValueObject(at.getBlockX(), at.getBlockY(), at.getBlockZ()));
-    this.homeAggregateRootRegistry.registerAndSave(new HomeAggregateRoot(homeModel));
-    return homeModel;
-  }
-
-  /**
-   * Deletes the specified home's information.
-   *
-   * @param homeId the home's id.
-   * @return Whether the home was fully deleted.
-   * @see io.github.aivruu.homes.home.application.registry.HomeAggregateRootRegistry#unregisterGlobally(String)
-   * @since 2.0.0
-   */
-  public boolean delete(final @NotNull String homeId) {
-    return this.homeAggregateRootRegistry.unregisterGlobally(homeId);
+    final HomeModelEntity homeModel = new HomeModelEntity(homeId,
+      new HomePositionValueObject(at.getBlockX(), at.getBlockY(), at.getBlockZ()));
+    return this.playerHomeController.addHome(player, homeModel);
   }
 }
