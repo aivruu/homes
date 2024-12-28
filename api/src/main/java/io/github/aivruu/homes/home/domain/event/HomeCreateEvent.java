@@ -60,7 +60,7 @@ public final class HomeCreateEvent extends Event {
    * @return The {@link HomeModelEntity}.
    * @since 2.0.0
    */
-  public @NotNull HomeModelEntity homeAggregateRoot() {
+  public @NotNull HomeModelEntity homeModel() {
     return this.homeModel;
   }
 
