@@ -1,8 +1,27 @@
-name: Homes
-main: com.aivruu.homes.HomesPlugin
-loader: com.aivruu.homes.HomesPluginLoader
-authors: [ Qekly ]
+name: AldrHomes
+main: io.github.aivruu.homes.HomesPlugin
+loader: io.github.aivruu.homes.library.application.HomesPluginLoader
+authors: [ aivruu ]
 
 api-version: "1.20"
 version: ${version}
-description: Lightweight and efficient Paper plugin to create multiple homes.
+
+permissions:
+  homes.command:
+    default: op
+    description: Allows the player to use the plugin's commands.
+    children:
+      homes.command.help:
+        description: Shows the help-message with the plugin's commands.
+      homes.command.reload:
+        description: Reloads the plugin's configuration.
+      homes.command.create:
+        description: Creates a new home at the player's location.
+      homes.command.delete:
+        description: Deletes a player's home.
+      homes.command.list:
+        description: Shows the player's homes.
+      homes.command.teleport:
+        description: Teleports the player to one of his homes.
+      homes.command.modify:
+        description: Changes the old player's home location by the current player's location.

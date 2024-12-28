@@ -1,47 +1,36 @@
 name: build
 on:
   push:
-    # Perform this workflow if the action is a 'push' and just in the 'main' branch.
-    branches: [main]
+    # Execute this job if the action is a 'push' onto current branch
+    branches:
+      - main
   pull_request:
-    # Perform this workflow if the action is a 'pull_request' and just in the 'main' branch.
-    branches: [main]
+    # Execute this job if the action is a 'pull_request'.
+    branches:
+      - main
 jobs:
   build:
-    # We want to run this job on ubuntu.
+    # We want to run this job on latest ubuntu release.
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        java_version: [17]
+        java_version: [ 21 ]
+
+    # Steps to fire on this job.
     steps:
-        # Do some checks for the repository.
-      - name: Checkout Repository
-        uses: actions/checkout@v2
-        
-        # Validate the Gradle Wrapper.
-      - name: Gradle Wrapper Validation
-        uses: gradle/wrapper-validation-action@v1
-        
-        # Setups the Java Version specified for this job.
-      - name: Set up JDK ${{ matrix.java_version }}
+      - name: checkout-repo
+        uses: actions/checkout@v3
+
+      - name: java-setup
         uses: actions/setup-java@v3
         with:
-          # We use Java 8 for this.
+          # Use the release set on the matrix.
           java-version: ${{ matrix.java_version }}
-          # We use the Azul Zulu distribution for the JDK.
+
+          # Use the Azul-Zulu JDK distribution.
           distribution: zulu
-          
-        # Performs the project build.
-      - name: Build plugin
-        # Give permissions to perform the script execution.
-        # And execute shadowJar script to compile project jars.
+
+      - name: compile
         run: |
           chmod +x gradlew
-          ./gradlew shadowJar
-
-      - name: Cleanup Gradle Cache
-        # Remove some files from the Gradle cache, so they aren't cached by GitHub Actions.
-        # Restoring these files from a GitHub Actions cache might cause problems for future builds.
-        run: |
-          rm -f ~/.gradle/caches/modules-2/modules-2.lock
-          rm -f ~/.gradle/caches/modules-2/gc.properties
+          ./gradlew build
