@@ -26,20 +26,17 @@ import org.jetbrains.annotations.NotNull;
  */
 public final class HomeModelEntity {
   private final String id;
-  private final String ownerId;
   private HomePositionValueObject position;
 
   /**
    * Creates a new {@link HomeModelEntity} with the provided parameters.
    *
    * @param id the home's id.
-   * @param ownerId the home's owner's id.
    * @param position the home's position.
    * @since 2.0.0
    */
-  public HomeModelEntity(final @NotNull String id, final @NotNull String ownerId, final @NotNull HomePositionValueObject position) {
+  public HomeModelEntity(final @NotNull String id, final @NotNull HomePositionValueObject position) {
     this.id = id;
-    this.ownerId = ownerId;
     this.position = position;
   }
 
@@ -51,16 +48,6 @@ public final class HomeModelEntity {
    */
   public @NotNull String id() {
     return this.id;
-  }
-
-  /**
-   * Returns the home's owner's id.
-   *
-   * @return The owner's identifier.
-   * @since 2.0.0
-   */
-  public @NotNull String ownerId() {
-    return this.ownerId;
   }
 
   /**
@@ -79,7 +66,7 @@ public final class HomeModelEntity {
    * @param position a new position for this home.
    * @since 2.0.0
    */
-  void position(final @NotNull HomePositionValueObject position) {
+  public void position(final @NotNull HomePositionValueObject position) {
     this.position = position;
   }
 }
