@@ -23,27 +23,16 @@ import org.spongepowered.configurate.objectmapping.meta.Comment;
 @ConfigSerializable
 public final class ConfigurationConfigurationModel implements ConfigurationInterface {
   @Comment("""
-    Represents the amount of threads that the 'executor-pool' of the plugin will be able to use, this threads
+    Represents the amount of threads that plugin's Executor will be able to use, this threads
     are used for asynchronous-operations for the plugin's infrastructure, such as load or save information into
-    persistent-storage.""")
-  public int threadsPoolSize = 2;
+    persistent-storage. If you don't know about this, don't touch it""")
+  public int threadPoolSize = 1;
 
   @Comment("""
     The infrastructure-type to use for the players' information storage, there are two options:
     - MONGODB: Uses the database to store the information.
     - JSON: Uses json-files for information storing at pre-defined directories.""")
   public String playerInfrastructureRepositoryType = "JSON";
-
-  @Comment("""
-    The infrastructure-type to use for the homes' information storage, there are two options:
-    - MONGODB: Uses the database to store the information.
-    - JSON: Uses json-files for information storing at pre-defined directories.""")
-  public String homeInfrastructureRepositoryType = "JSON";
-
-  @Comment("""
-    The name of the MongoDB's database's collection or the directory's name where the homes' information
-    will be stored by the plugin.""")
-  public String homeCollectionAndDirectoryName = "homes";
 
   @Comment("""
     The name of the MongoDB's database's collection or the directory's name where the players' information
