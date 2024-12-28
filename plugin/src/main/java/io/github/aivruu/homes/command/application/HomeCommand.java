@@ -115,9 +115,9 @@ public final class HomeCommand extends AbstractRegistrableCommand {
           for (byte i = 0; i < homes.length; i++) {
             final HomePositionValueObject position = homes[i].position();
             BUILDER.append(messages.homeListFormat.replace("<id>", homes[i].id()
-              .replace("<x>", Integer.toString(position.x()))
-              .replace("<y>", Integer.toString(position.y()))
-              .replace("<z>", Integer.toString(position.z()))
+              .replace("<home-x>", Integer.toString(position.x()))
+              .replace("<home-y>", Integer.toString(position.y()))
+              .replace("<home-z>", Integer.toString(position.z()))
             )).append("\n");
           }
           player.sendMessage(MiniMessageHelper.parse(BUILDER.toString()));
