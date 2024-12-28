@@ -18,9 +18,6 @@ package io.github.aivruu.homes.persistence.infrastructure;
 
 import com.mongodb.client.MongoClient;
 import io.github.aivruu.homes.config.application.object.ConfigurationConfigurationModel;
-import io.github.aivruu.homes.home.domain.HomeAggregateRoot;
-import io.github.aivruu.homes.home.infrastructure.json.HomeJsonInfrastructureAggregateRootRepository;
-import io.github.aivruu.homes.home.infrastructure.mongodb.HomeMongoInfrastructureAggregateRootRepository;
 import io.github.aivruu.homes.persistence.domain.InfrastructureAggregateRootRepository;
 import io.github.aivruu.homes.persistence.infrastructure.utils.MongoClientHelper;
 import io.github.aivruu.homes.player.domain.PlayerAggregateRoot;
@@ -34,9 +31,7 @@ import java.nio.file.Path;
 public final class InfrastructureRepositoryController {
   private final Path dataFolder;
   private final ConfigurationConfigurationModel configuration;
-  private InfrastructureAggregateRootRepository<HomeAggregateRoot> homeInfrastructureAggregateRootRepository;
   private InfrastructureAggregateRootRepository<PlayerAggregateRoot> playerInfrastructureAggregateRootRepository;
-  private InfrastructureRepositoryType homeInfrastructureRepositoryType;
   private InfrastructureRepositoryType playerInfrastructureRepositoryType;
 
   public InfrastructureRepositoryController(final @NotNull Path dataFolder, final @NotNull ConfigurationConfigurationModel configuration) {
@@ -44,16 +39,7 @@ public final class InfrastructureRepositoryController {
     this.configuration = configuration;
   }
 
-  private void validateInfrastructureTypes() {
-    // Home aggregate-root repository-type validation.
-    if (this.configuration.homeInfrastructureRepositoryType.equals("JSON")) {
-      this.homeInfrastructureRepositoryType = InfrastructureRepositoryType.JSON;
-    } else if (this.configuration.homeInfrastructureRepositoryType.equals("MONGODB")) {
-      this.homeInfrastructureRepositoryType = InfrastructureRepositoryType.MONGODB;
-    } else {
-      this.homeInfrastructureRepositoryType = InfrastructureRepositoryType.JSON;
-    }
-    // Player aggregate-root repository-type validation.
+  private void validateInfrastructureType() {
     if (this.configuration.playerInfrastructureRepositoryType.equals("JSON")) {
       this.playerInfrastructureRepositoryType = InfrastructureRepositoryType.JSON;
     } else if (this.configuration.playerInfrastructureRepositoryType.equals("MONGODB")) {
@@ -64,10 +50,10 @@ public final class InfrastructureRepositoryController {
   }
 
   public boolean selectAndInitialize() {
-    this.validateInfrastructureTypes();
+    this.validateInfrastructureType();
     MongoClient client = null;
     // MongoClient instance initialization if any repository require it.
-    if (this.playerInfrastructureRepositoryType == InfrastructureRepositoryType.MONGODB || this.homeInfrastructureRepositoryType == InfrastructureRepositoryType.MONGODB) {
+    if (this.playerInfrastructureRepositoryType == InfrastructureRepositoryType.MONGODB) {
       MongoClientHelper.buildClient(this.configuration.mongoHost, this.configuration.mongoUsername, this.configuration.mongoDatabase, this.configuration.mongoPassword);
       client = MongoClientHelper.client();
       // Check if parameters are valid and client was initialized correctly.
@@ -75,26 +61,16 @@ public final class InfrastructureRepositoryController {
         return false;
       }
     }
-    this.homeInfrastructureAggregateRootRepository = (this.homeInfrastructureRepositoryType == InfrastructureRepositoryType.JSON)
-      ? new HomeJsonInfrastructureAggregateRootRepository(this.dataFolder.resolve(this.configuration.homeCollectionAndDirectoryName))
-      : new HomeMongoInfrastructureAggregateRootRepository(client, this.configuration.mongoDatabase, this.configuration.homeCollectionAndDirectoryName);
     this.playerInfrastructureAggregateRootRepository = (this.playerInfrastructureRepositoryType == InfrastructureRepositoryType.JSON)
       ? new PlayerJsonInfrastructureAggregateRootRepository(this.dataFolder.resolve(this.configuration.playerCollectionAndDirectoryName))
       : new PlayerMongoInfrastructureAggregateRootRepository(client, this.configuration.mongoDatabase, this.configuration.playerCollectionAndDirectoryName);
-    return this.homeInfrastructureAggregateRootRepository.start() && this.playerInfrastructureAggregateRootRepository.start();
+    return this.playerInfrastructureAggregateRootRepository.start();
   }
 
   public void close() {
     if (this.playerInfrastructureRepositoryType == InfrastructureRepositoryType.MONGODB) {
       this.playerInfrastructureAggregateRootRepository.close();
     }
-    if (this.homeInfrastructureRepositoryType == InfrastructureRepositoryType.MONGODB) {
-      this.homeInfrastructureAggregateRootRepository.close();
-    }
-  }
-
-  public @Nullable InfrastructureAggregateRootRepository<HomeAggregateRoot> homeInfrastructureAggregateRootRepository() {
-    return this.homeInfrastructureAggregateRootRepository;
   }
 
   public @Nullable InfrastructureAggregateRootRepository<PlayerAggregateRoot> playerInfrastructureAggregateRootRepository() {
