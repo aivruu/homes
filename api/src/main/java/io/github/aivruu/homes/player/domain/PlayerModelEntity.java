@@ -55,19 +55,20 @@ public final class PlayerModelEntity {
   }
 
   /**
-   * Checks if the player has a home with the specified id.
+   * Returns the {@link HomeModelEntity} for the specified id.
    *
    * @param home the home to check.
-   * @return Whether this player home exists.
+   * @return A {@link HomeModelEntity} or {@code null} if not found.
    * @since 2.0.0
    */
-  public boolean has(final @NotNull String home) {
-    for (final HomeModelEntity homeModel : this.homes) {
-      if (homeModel.id().equals(home)) {
-        return true;
+  @Nullable HomeModelEntity home(final @NotNull String home) {
+    for (byte i = 0; i < this.homes.length; i++) {
+      if (!this.homes[i].id().equals(home)) {
+        continue;
       }
+      return this.homes[i];
     }
-    return false;
+    return null;
   }
 
   /**
@@ -87,7 +88,7 @@ public final class PlayerModelEntity {
    * @return The {@link HomeModelEntity} or {@code null} if not exists.
    * @since 2.0.0
    */
-  public @Nullable HomeModelEntity indexOfHome(final @NotNull String home) {
+  @Nullable HomeModelEntity indexOfHome(final @NotNull String home) {
     byte start = 0;
     byte end = (byte) (this.homes.length - 1);
 
