@@ -33,7 +33,7 @@ public final class MessagesConfigurationModel implements ConfigurationInterface 
     "<gray> - <yellow>/home modify <id></yellow> Modifies the home with that ID's location.",
   };
 
-  public String reloadSuccess = "<blue>[AldrHomes] <dark_gray><b>></b> <gradient:green:yellow>The configurations werer updated correctly.";
+  public String reloadSuccess = "<blue>[AldrHomes] <dark_gray><b>></b> <gradient:green:yellow>The configurations has been updated correctly.";
 
   public String reloadError = "<blue>[AldrHomes] <dark_gray><b>></b> <red>An error occurred during configurations reloading.";
 
@@ -49,21 +49,16 @@ public final class MessagesConfigurationModel implements ConfigurationInterface 
 
   public String empty = "<blue>[AldrHomes] <dark_gray><b>></b> <red>You don't have any homes yet.";
 
-  public String homeListFormat = "<yellow><id> <gray>[<hover:show_text:'<gray>Go to this home.'><click:run_command:'/home teleport <id>'>TP</click></hover> | <hover:show_text:'<red>X: <gray><home-x>,</gray> Y: <gray><home-y>,</gray> Z: <gray><home-z>'>Location</hover> | <hover:show_text:'<gray>Use current location as new home's position.'><click:run_command:'/home modify <id>'>Modify</click></hover>]";
+  public String homeListFormat = "<yellow><id> <gray>[<hover:show_text:'<gray>Go to this home.'><click:run_command:'/home teleport <id>'>TP</click></hover> | <hover:show_text:'<red>X: <gray><home-x>,</gray> Y: <gray><home-y>,</gray> Z: <gray><home-z>'>Location</hover> | <hover:show_text:'<gray>Use current location as home its new position.'><click:run_command:'/home modify <id>'>Modify</click></hover> | <hover:show_text:'<gray>Click to delete this home.'><click:run_command:'/home delete <id>'>Delete</click></hover>]";
 
-  public String[] listHeader = {
-    "",
-    "<gradient:gold:yellow>AldrHomes | Your Current Homes:",
-    ""
-  };
+  public String listHeader = """
+    <gradient:gold:yellow>AldrHomes | Your Current Homes:
 
-  public String[] listFooter = { "" };
+    """;
 
   public String deleted = "<blue>[AldrHomes] <dark_gray><b>></b> <red>The home-point has been deleted.";
 
-  public String creationError = "<blue>[AldrHomes] <dark_gray><b>></b> <red>That home already exists or its data couldn't be saved.";
-
-  public String additionError = "<blue>[AldrHomes] <dark_gray><b>></b> <red>This home already exists or you've reached the max-homes limit.";
+  public String creationError = "<blue>[AldrHomes] <dark_gray><b>></b> <red>That home already exists or you've reached the max-homes limit.";
 
   public String created = "<blue>[AldrHomes] <dark_gray><b>></b> <gradient:green:yellow>The home-point has been created.";
 }
