@@ -16,7 +16,7 @@
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 package io.github.aivruu.homes.home.domain.event;
 
-import io.github.aivruu.homes.home.domain.HomeAggregateRoot;
+import io.github.aivruu.homes.home.domain.HomeModelEntity;
 import io.github.aivruu.homes.home.domain.position.HomePositionValueObject;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
@@ -33,7 +33,7 @@ import org.jetbrains.annotations.NotNull;
 public final class HomePositionUpdateEvent extends Event implements Cancellable {
   private static final HandlerList HANDLER_LIST = new HandlerList();
   private final Player player;
-  private final HomeAggregateRoot homeAggregateRoot;
+  private final HomeModelEntity homeModel;
   private final HomePositionValueObject oldPosition;
   private final HomePositionValueObject newPosition;
   private boolean cancelled;
@@ -42,18 +42,18 @@ public final class HomePositionUpdateEvent extends Event implements Cancellable 
    * Creates a new {@link HomePositionUpdateEvent} with the provided parameters.
    *
    * @param player the player involved.
-   * @param homeAggregateRoot the {@link HomeAggregateRoot} for this event.
+   * @param homeModel the {@link HomeModelEntity} for this event.
    * @param oldPosition the home's old location.
    * @param newPosition the home's current location.
    * @since 2.0.0
    */
   public HomePositionUpdateEvent(
     final @NotNull Player player,
-    final @NotNull HomeAggregateRoot homeAggregateRoot,
+    final @NotNull HomeModelEntity homeModel,
     final @NotNull HomePositionValueObject oldPosition,
     final @NotNull HomePositionValueObject newPosition) {
     this.player = player;
-    this.homeAggregateRoot = homeAggregateRoot;
+    this.homeModel = homeModel;
     this.oldPosition = oldPosition;
     this.newPosition = newPosition;
   }
@@ -69,13 +69,13 @@ public final class HomePositionUpdateEvent extends Event implements Cancellable 
   }
 
   /**
-   * Returns the {@link HomeAggregateRoot} involved in this event.
+   * Returns the {@link HomeModelEntity} involved in this event.
    *
-   * @return The {@link HomeAggregateRoot}.
+   * @return The {@link HomeModelEntity}.
    * @since 2.0.0
    */
-  public @NotNull HomeAggregateRoot homeAggregateRoot() {
-    return this.homeAggregateRoot;
+  public @NotNull HomeModelEntity homeModel() {
+    return this.homeModel;
   }
 
   /**
