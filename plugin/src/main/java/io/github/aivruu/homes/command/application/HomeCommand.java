@@ -34,13 +34,11 @@ import io.github.aivruu.homes.player.domain.PlayerAggregateRoot;
 import io.github.aivruu.homes.result.domain.ValueObjectMutationResult;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
-import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 public final class HomeCommand extends AbstractRegistrableCommand {
+  private static final StringBuilder BUILDER = new StringBuilder();
   private final PlayerManagerService playerManagerService;
   private final PlayerHomeController playerHomeController;
   private final HomeCreatorService homeCreatorService;
@@ -73,13 +71,8 @@ public final class HomeCommand extends AbstractRegistrableCommand {
           .executes(ctx -> {
             final MessagesConfigurationModel messages = super.messages.model();
             final Player player = (Player) ctx.getSource().getSender();
-            final HomeModelEntity homeModel = this.homeCreatorService.create(player, ctx.getArgument("id", String.class));
-            if (homeModel == null) {
+            if (!this.homeCreatorService.create(player, ctx.getArgument("id", String.class))) {
               player.sendMessage(MiniMessageHelper.parse(messages.creationError));
-              return Command.SINGLE_SUCCESS;
-            }
-            if (!this.playerHomeController.addHome(player, homeModel)) {
-              player.sendMessage(MiniMessageHelper.parse(messages.additionError));
             } else {
               player.sendMessage(MiniMessageHelper.parse(messages.created));
             }
@@ -94,8 +87,7 @@ public final class HomeCommand extends AbstractRegistrableCommand {
           .executes(ctx -> {
             final MessagesConfigurationModel messages = super.messages.model();
             final Player player = (Player) ctx.getSource().getSender();
-            final boolean wasRemoved = this.playerHomeController.removeHome(player, ctx.getArgument("id", String.class));
-            if (!wasRemoved) {
+            if (!this.playerHomeController.removeHome(player, ctx.getArgument("id", String.class))) {
               player.sendMessage(MiniMessageHelper.parse(messages.unknownHome));
             } else {
               player.sendMessage(MiniMessageHelper.parse(messages.deleted));
@@ -114,21 +106,22 @@ public final class HomeCommand extends AbstractRegistrableCommand {
             player.sendMessage(MiniMessageHelper.parse(messages.playerUnknownInfo));
             return Command.SINGLE_SUCCESS;
           }
-          if (playerAggregateRoot.homes().length == 0) {
+          final HomeModelEntity[] homes = playerAggregateRoot.homes();
+          if (homes.length == 0) {
             player.sendMessage(MiniMessageHelper.parse(messages.empty));
             return Command.SINGLE_SUCCESS;
           }
-          final TextComponent.Builder componentBuilder = Component.text().append(MiniMessageHelper.parse(messages.listHeader));
-          for (final HomeModelEntity homeModel : playerAggregateRoot.homes()) {
-            final HomePositionValueObject position = homeModel.position();
-            componentBuilder.append(MiniMessageHelper.parse(messages.homeListFormat,
-              Placeholder.parsed("id", homeModel.id()),
-              Placeholder.parsed("home-x", Integer.toString(position.x())),
-              Placeholder.parsed("home-y", Integer.toString(position.y())),
-              Placeholder.parsed("home-z", Integer.toString(position.z()))));
+          BUILDER.append(messages.listHeader);
+          for (byte i = 0; i < homes.length; i++) {
+            final HomePositionValueObject position = homes[i].position();
+            BUILDER.append(messages.homeListFormat.replace("<id>", homes[i].id()
+              .replace("<x>", Integer.toString(position.x()))
+              .replace("<y>", Integer.toString(position.y()))
+              .replace("<z>", Integer.toString(position.z()))
+            )).append("\n");
           }
-          componentBuilder.append(MiniMessageHelper.parse(messages.listFooter));
-          player.sendMessage(componentBuilder.build());
+          player.sendMessage(MiniMessageHelper.parse(BUILDER.toString()));
+          BUILDER.setLength(0);
           return Command.SINGLE_SUCCESS;
         })
       )
@@ -159,9 +152,12 @@ public final class HomeCommand extends AbstractRegistrableCommand {
             final ValueObjectMutationResult<HomePositionValueObject> result = this.homePositionUpdater.updatePosition(
               player, ctx.getArgument("id", String.class), player.getLocation());
             switch (result.status()) {
-              case ValueObjectMutationResult.MUTATED_STATUS -> player.sendMessage(MiniMessageHelper.parse(messages.locationModified));
-              case ValueObjectMutationResult.UNCHANGED_STATUS -> player.sendMessage(MiniMessageHelper.parse(messages.locationModifyError));
-              case ValueObjectMutationResult.ERROR_STATUS -> player.sendMessage(MiniMessageHelper.parse(messages.unknownHome));
+              case ValueObjectMutationResult.MUTATED_STATUS ->
+                player.sendMessage(MiniMessageHelper.parse(messages.locationModified));
+              case ValueObjectMutationResult.UNCHANGED_STATUS ->
+                player.sendMessage(MiniMessageHelper.parse(messages.locationModifyError));
+              case ValueObjectMutationResult.ERROR_STATUS ->
+                player.sendMessage(MiniMessageHelper.parse(messages.unknownHome));
             }
             return Command.SINGLE_SUCCESS;
           })
