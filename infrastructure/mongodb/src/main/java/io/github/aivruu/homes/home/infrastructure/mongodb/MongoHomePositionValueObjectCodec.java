@@ -22,6 +22,8 @@ import org.bson.BsonWriter;
 import org.bson.codecs.Codec;
 import org.bson.codecs.DecoderContext;
 import org.bson.codecs.EncoderContext;
+import org.bukkit.Bukkit;
+import org.bukkit.World;
 import org.jetbrains.annotations.NotNull;
 
 public enum MongoHomePositionValueObjectCodec implements Codec<HomePositionValueObject> {
@@ -29,7 +31,9 @@ public enum MongoHomePositionValueObjectCodec implements Codec<HomePositionValue
 
   @Override
   public @NotNull HomePositionValueObject decode(final BsonReader reader, final DecoderContext decoderContext) {
+    final String worldName = reader.readString("world");
     return new HomePositionValueObject(
+      worldName.equals("unknown") ? null : Bukkit.getWorld(worldName),
       reader.readInt32("x"),
       reader.readInt32("y"),
       reader.readInt32("z")
@@ -38,6 +42,12 @@ public enum MongoHomePositionValueObjectCodec implements Codec<HomePositionValue
 
   @Override
   public void encode(final BsonWriter writer, final HomePositionValueObject position, final EncoderContext encoderContext) {
+    final World world = position.world();
+    if (world == null) {
+      writer.writeString("world", "unknown");
+    } else {
+      writer.writeString("world", world.getName());
+    }
     writer.writeInt32("x", position.x());
     writer.writeInt32("y", position.y());
     writer.writeInt32("z", position.z());

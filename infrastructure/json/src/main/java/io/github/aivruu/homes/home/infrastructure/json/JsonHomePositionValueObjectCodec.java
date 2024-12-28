@@ -24,6 +24,8 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 import io.github.aivruu.homes.home.domain.position.HomePositionValueObject;
+import org.bukkit.Bukkit;
+import org.bukkit.World;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Type;
@@ -34,7 +36,9 @@ public enum JsonHomePositionValueObjectCodec implements JsonSerializer<HomePosit
   @Override
   public @NotNull HomePositionValueObject deserialize(final JsonElement json, final Type type, final JsonDeserializationContext ctx) throws JsonParseException {
     final JsonObject jsonObject = json.getAsJsonObject();
+    final String worldName = jsonObject.get("world").getAsString();
     return new HomePositionValueObject(
+      worldName.equals("unknown") ? null : Bukkit.getWorld(worldName),
       jsonObject.get("x").getAsInt(),
       jsonObject.get("y").getAsInt(),
       jsonObject.get("z").getAsInt()
@@ -44,6 +48,12 @@ public enum JsonHomePositionValueObjectCodec implements JsonSerializer<HomePosit
   @Override
   public @NotNull JsonElement serialize(final HomePositionValueObject position, final Type type, final JsonSerializationContext ctx) {
     final JsonObject jsonObject = new JsonObject();
+    final World world = position.world();
+    if (world == null) {
+      jsonObject.addProperty("world", "unknown");
+    } else {
+      jsonObject.addProperty("world", world.getName());
+    }
     jsonObject.addProperty("x", position.x());
     jsonObject.addProperty("y", position.y());
     jsonObject.addProperty("z", position.z());
