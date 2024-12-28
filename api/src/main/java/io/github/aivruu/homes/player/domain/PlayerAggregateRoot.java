@@ -42,17 +42,6 @@ public final class PlayerAggregateRoot extends AggregateRoot {
   }
 
   /**
-   * Returns the identifier of the player.
-   *
-   * @return The {@link PlayerModelEntity}'s id.
-   * @see PlayerModelEntity#id()
-   * @since 2.0.0
-   */
-  public @NotNull String id() {
-    return this.playerModel.id();
-  }
-
-  /**
    * Returns the player's homes-array.
    *
    * @return The {@link PlayerModelEntity}'s homes.
@@ -64,18 +53,6 @@ public final class PlayerAggregateRoot extends AggregateRoot {
   }
 
   /**
-   * Checks if the player has a home with the provided id.
-   *
-   * @param home the home to check.
-   * @return Whether the player has the specified home.
-   * @see PlayerModelEntity#has(String)
-   * @since 2.0.0
-   */
-  public boolean exists(final @NotNull String home) {
-    return this.playerModel.has(home);
-  }
-
-  /**
    * Returns a {@link HomeModelEntity} from the player's homes-array with the provided id.
    *
    * @param home the home to find.
@@ -83,7 +60,7 @@ public final class PlayerAggregateRoot extends AggregateRoot {
    * @since 2.0.0
    */
   public @Nullable HomeModelEntity home(final @NotNull String home) {
-    return this.playerModel.indexOfHome(home);
+    return this.playerModel.home(home);
   }
 
   /**
