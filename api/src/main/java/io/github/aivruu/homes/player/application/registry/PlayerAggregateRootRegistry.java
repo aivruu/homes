@@ -24,8 +24,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * An {@link AggregateRootRegistry} implementation for {@link PlayerAggregateRoot} management.
@@ -50,22 +50,12 @@ public final class PlayerAggregateRootRegistry implements AggregateRootRegistry<
 
   @Override
   public @Nullable PlayerAggregateRoot findInBoth(final @NotNull String id) {
-    final PlayerAggregateRoot playerAggregateRoot = this.playerAggregateRootRepository.findSync(id);
-    return (playerAggregateRoot != null) ? playerAggregateRoot : this.findInInfrastructure(id);
+    return null;
   }
 
   @Override
   public @Nullable PlayerAggregateRoot findInInfrastructure(final @NotNull String id) {
-    final AtomicReference<PlayerAggregateRoot> playerAggregateRootAtomicReference = new AtomicReference<>();
-    this.playerAsyncAggregateRootRepository.findAsync(id)
-      .handle((providerPlayerAggregateRoot, exception) -> {
-        if (exception != null) {
-          exception.printStackTrace();
-        }
-        return providerPlayerAggregateRoot;
-      })
-      .thenAccept(playerAggregateRootAtomicReference::set);
-    return playerAggregateRootAtomicReference.get();
+    return this.playerAsyncAggregateRootRepository.findAsync(id).join();
   }
 
   @Override
@@ -91,37 +81,17 @@ public final class PlayerAggregateRootRegistry implements AggregateRootRegistry<
   }
 
   @Override
-  public boolean registerAndSave(final @NotNull PlayerAggregateRoot aggregateRoot) {
-    if (this.playerAggregateRootRepository.existsSync(aggregateRoot.id())) {
-      return false;
-    }
+  public void register(final @NotNull PlayerAggregateRoot aggregateRoot) {
     this.playerAggregateRootRepository.saveSync(aggregateRoot);
-    final AtomicBoolean provider = new AtomicBoolean();
-    this.playerAsyncAggregateRootRepository.saveAsync(aggregateRoot).thenAccept(provider::set);
-    return provider.get();
   }
 
   @Override
-  public boolean unregisterAndSave(final @NotNull String id) {
-    final PlayerAggregateRoot playerAggregateRoot = this.playerAggregateRootRepository.deleteSync(id);
-    return playerAggregateRoot != null && this.save(playerAggregateRoot);
+  public @Nullable PlayerAggregateRoot unregister(final @NotNull String id) {
+    return this.playerAggregateRootRepository.deleteSync(id);
   }
 
   @Override
-  public boolean save(final @NotNull PlayerAggregateRoot aggregateRoot) {
-    final AtomicBoolean provider = new AtomicBoolean();
-    this.playerAsyncAggregateRootRepository.saveAsync(aggregateRoot).thenAccept(provider::set);
-    return provider.get();
-  }
-
-  @Override
-  public boolean unregisterGlobally(final @NotNull String id) {
-    final PlayerAggregateRoot playerAggregateRoot = this.playerAggregateRootRepository.deleteSync(id);
-    if (playerAggregateRoot == null || !this.existsInInfrastructure(id)) {
-      return false;
-    }
-    final AtomicBoolean provider = new AtomicBoolean();
-    this.playerAsyncAggregateRootRepository.deleteAsync(id).thenAccept(provider::set);
-    return provider.get();
+  public @NotNull CompletableFuture<Boolean> save(final @NotNull PlayerAggregateRoot aggregateRoot) {
+    return this.playerAsyncAggregateRootRepository.saveAsync(aggregateRoot);
   }
 }
