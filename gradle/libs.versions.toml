@@ -9,7 +9,6 @@ configurate = "4.1.2"
 
 annotations = "24.0.1"
 
-caffeine = "3.1.8"
 mongodb = "5.2.0"
 gson = "2.11.0"
 
@@ -17,7 +16,6 @@ gson = "2.11.0"
 paper = { module = "io.papermc.paper:paper-api", version.ref = "paper" }
 configurate = { module = "org.spongepowered:configurate-hocon", version.ref = "configurate" }
 annotations = { group = "org.jetbrains", name = "annotations", version.ref = "annotations" }
-caffeine = { group = "com.github.ben-manes.caffeine", name = "caffeine", version.ref = "caffeine" }
 mongodb = { module = "org.mongodb:mongodb-driver-sync", version.ref = "mongodb"}
 gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
 

@@ -17,5 +17,4 @@ dependencies {
 
   compileOnlyApi(libs.paper)
   compileOnlyApi(libs.configurate)
-  compileOnlyApi(libs.caffeine)
 }
