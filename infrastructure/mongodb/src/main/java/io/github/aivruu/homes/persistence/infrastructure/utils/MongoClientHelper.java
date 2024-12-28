@@ -21,9 +21,8 @@ import com.mongodb.MongoClientSettings;
 import com.mongodb.MongoCredential;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
-import io.github.aivruu.homes.home.infrastructure.mongodb.codec.MongoHomeAggregateRootCodec;
-import io.github.aivruu.homes.home.infrastructure.mongodb.codec.MongoHomeModelEntityCodec;
-import io.github.aivruu.homes.home.infrastructure.mongodb.codec.MongoHomePositionValueObjectCodec;
+import io.github.aivruu.homes.home.infrastructure.mongodb.MongoHomeModelEntityCodec;
+import io.github.aivruu.homes.home.infrastructure.mongodb.MongoHomePositionValueObjectCodec;
 import io.github.aivruu.homes.player.infrastructure.mongodb.codec.MongoPlayerAggregateRootCodec;
 import org.bson.codecs.configuration.CodecRegistries;
 import org.jetbrains.annotations.NotNull;
@@ -60,14 +59,11 @@ public final class MongoClientHelper {
     final MongoClientSettings clientSettings = MongoClientSettings.builder()
       .applyConnectionString(new ConnectionString("mongodb://" + host))
       .credential(MongoCredential.createCredential(username, database, password.toCharArray()))
-      .codecRegistry(
-        CodecRegistries.fromCodecs(
-          MongoPlayerAggregateRootCodec.INSTANCE,
-          MongoHomeAggregateRootCodec.INSTANCE,
-          MongoHomePositionValueObjectCodec.INSTANCE,
-          MongoHomeModelEntityCodec.INSTANCE
-        )
-      )
+      .codecRegistry(CodecRegistries.fromCodecs(
+        MongoPlayerAggregateRootCodec.INSTANCE,
+        MongoHomeModelEntityCodec.INSTANCE,
+        MongoHomePositionValueObjectCodec.INSTANCE
+      ))
       .build();
     client = MongoClients.create(clientSettings);
   }
