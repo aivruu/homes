@@ -61,7 +61,7 @@ public final class HomeCreatorService {
     }
     final Location at = player.getLocation();
     final HomeModelEntity homeModel = new HomeModelEntity(homeId,
-      new HomePositionValueObject(at.getBlockX(), at.getBlockY(), at.getBlockZ()));
+      new HomePositionValueObject(player.getWorld(), at.getBlockX(), at.getBlockY(), at.getBlockZ()));
     return this.playerHomeController.addHome(player, homeModel);
   }
 }
