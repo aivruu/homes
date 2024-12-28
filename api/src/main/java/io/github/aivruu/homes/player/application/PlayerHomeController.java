@@ -24,6 +24,7 @@ import io.github.aivruu.homes.home.domain.position.HomePositionValueObject;
 import io.github.aivruu.homes.player.domain.PlayerAggregateRoot;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -33,6 +34,14 @@ import org.jetbrains.annotations.NotNull;
  * @since 2.0.0
  */
 public final class PlayerHomeController {
+  /** The player's {@link PlayerAggregateRoot} isn't cached. */
+  public static final byte PLAYER_INFORMATION_IS_NOT_AVAILABLE = -1;
+  /** The specified home doesn't exist or the player isn't its owner. */
+  public static final byte PLAYER_HOME_DOES_NOT_EXIST = -2;
+  /** The home's {@link World} doesn't exist. */
+  public static final byte PLAYER_HOME_WORLD_IS_NOT_AVAILABLE = -3;
+  /** The player's home-teleport request was completed. */
+  public static final byte PLAYER_HOME_TELEPORT_VALID = -4;
   private final AggregateRootRegistry<PlayerAggregateRoot> playerAggregateRootRegistry;
 
   /**
@@ -108,26 +117,36 @@ public final class PlayerHomeController {
   }
 
   /**
-   * Teleports the player to the specified home, only if he's the owner.
+   * Teleports the player to the specified home.
    *
    * @param player the player.
    * @param homeId the home to teleport to.
-   * @return Whether the player was teleport (if is home's owner).
+   * @return A status code for the teleport operation:
+   * <ul>
+   * <li>{@link #PLAYER_HOME_TELEPORT_VALID} if the teleport was completed correctly.</li>
+   * <li>{@link #PLAYER_INFORMATION_IS_NOT_AVAILABLE} if the player's information is not available.</li>
+   * <li>{@link #PLAYER_HOME_DOES_NOT_EXIST} if the player's home does not exist.</li>
+   * <li>{@link #PLAYER_HOME_WORLD_IS_NOT_AVAILABLE} if the player's home's world is not available.</li>
+   * </ul>
    * @see io.github.aivruu.homes.player.application.registry.PlayerAggregateRootRegistry#findInCache(String)
    * @see PlayerAggregateRoot#home(String)
    * @since 2.0.0
    */
-  public boolean teleportToHome(final @NotNull Player player, final @NotNull String homeId) {
+  public byte teleportToHome(final @NotNull Player player, final @NotNull String homeId) {
     final PlayerAggregateRoot playerAggregateRoot = this.playerAggregateRootRegistry.findInCache(player.getUniqueId().toString());
     if (playerAggregateRoot == null) {
-      return false;
+      return PLAYER_INFORMATION_IS_NOT_AVAILABLE;
     }
     final HomeModelEntity homeModel = playerAggregateRoot.home(homeId);
     if (homeModel == null) {
-      return false;
+      return PLAYER_HOME_DOES_NOT_EXIST;
     }
     final HomePositionValueObject position = homeModel.position();
-    player.teleportAsync(new Location(player.getWorld(), position.x(), position.y(), position.z()));
-    return true;
+    final World world = position.world();
+    if (world == null) {
+      return PLAYER_HOME_WORLD_IS_NOT_AVAILABLE;
+    }
+    player.teleportAsync(new Location(world, position.x(), position.y(), position.z()));
+    return PLAYER_HOME_TELEPORT_VALID;
   }
 }
