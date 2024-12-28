@@ -38,14 +38,14 @@ public final class PlayerRegistryListener implements Listener {
   @EventHandler
   public void onAsyncPreLogin(final @NotNull AsyncPlayerPreLoginEvent event) {
     if (!this.playerManagerService.loadOne(event.getUniqueId().toString())) {
-      this.logger.error(Component.text("This player's information seems already loaded.").color(NamedTextColor.YELLOW));
+      this.logger.error(Component.text("Couldn't load this player's information.").color(NamedTextColor.YELLOW));
     }
   }
 
   @EventHandler
   public void onQuit(final @NotNull PlayerQuitEvent event) {
     if (!this.playerManagerService.unloadOne(event.getPlayer().getUniqueId().toString())) {
-      this.logger.error(Component.text("This player's information couldn't be saved").color(NamedTextColor.YELLOW));
+      this.logger.error(Component.text("Couldn't save this player's information.").color(NamedTextColor.YELLOW));
     }
   }
 }
