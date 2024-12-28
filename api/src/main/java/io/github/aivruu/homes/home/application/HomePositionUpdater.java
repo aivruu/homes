@@ -47,7 +47,6 @@ public final class HomePositionUpdater {
    *
    * @param player the player who is updating their home's position.
    * @param homeId the home's id.
-   * @param newLocation the player's {@link Location} used as new home-position.
    * @return A {@link ValueObjectMutationResult} for this operation. The result for this operation can be:
    * <ul>
    * <li>{@link ValueObjectMutationResult#mutated(Object)} if the position was modified. {@link ValueObjectMutationResult#result()} isn't {@code null}.</li>
@@ -59,8 +58,7 @@ public final class HomePositionUpdater {
    */
   public @NotNull ValueObjectMutationResult<@Nullable HomePositionValueObject> updatePosition(
     final @NotNull Player player,
-    final @NotNull String homeId,
-    final @NotNull Location newLocation
+    final @NotNull String homeId
   ) {
     final PlayerAggregateRoot playerAggregateRoot = this.playerAggregateRootRegistry.findInCache(player.getUniqueId().toString());
     if (playerAggregateRoot == null) {
@@ -73,14 +71,13 @@ public final class HomePositionUpdater {
     // Get current home's position (location), and make some checks to avoid unnecessary updates if the
     // location has no changes.
     final HomePositionValueObject homePosition = homeModel.position();
-    final int x = newLocation.getBlockX();
-    final int y = newLocation.getBlockY();
-    final int z = newLocation.getBlockZ();
-    if (homePosition.x() == x && homePosition.y() == y && homePosition.z() == z) {
+    final Location location = player.getLocation();
+    final HomePositionValueObject newPosition = new HomePositionValueObject(
+      location.getWorld(), location.getBlockX(), location.getBlockY(), location.getBlockZ());
+    if (newPosition.equals(homePosition)) {
       return ValueObjectMutationResult.unchanged();
     }
     // Position-updating event firing process.
-    final HomePositionValueObject newPosition = new HomePositionValueObject(x, y, z);
     final HomePositionUpdateEvent homePositionUpdateEvent = new HomePositionUpdateEvent(player, homeModel, homePosition, newPosition);
     Bukkit.getPluginManager().callEvent(homePositionUpdateEvent);
     if (homePositionUpdateEvent.isCancelled()) {
