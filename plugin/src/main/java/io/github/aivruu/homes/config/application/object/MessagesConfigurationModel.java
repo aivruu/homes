@@ -41,6 +41,8 @@ public final class MessagesConfigurationModel implements ConfigurationInterface 
 
   public String unknownHome = "<blue>[AldrHomes] <dark_gray><b>></b> <red>That home-point doesn't exist.";
 
+  public String homeWorldUnavailable = "<blue>[AldrHomes] <dark_gray><b>></b> <red>That home-point's world isn't available.";
+
   public String teleported = "<blue>[AldrHomes] <dark_gray><b>></b> <gradient:green:yellow>You have been teleported to your home-point.";
 
   public String locationModified = "<blue>[AldrHomes] <dark_gray><b>></b> <gradient:green:yellow>The location of your home-point was modified.";
