@@ -16,21 +16,27 @@
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 package io.github.aivruu.homes.home.domain.position;
 
+import org.bukkit.World;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Represents a {@link io.github.aivruu.homes.home.domain.HomeModelEntity}'s location.
  *
+ * @param world the home's world or {@code null} if not available.
  * @param x the home's x-coordinate.
  * @param y the home's y-coordinate.
  * @param z the home's z-coordinate.
  * @since 2.0.0
  */
-public record HomePositionValueObject(int x, int y, int z) {
+public record HomePositionValueObject(@Nullable World world, int x, int y, int z) {
   @Override
   public boolean equals(final @NotNull Object o) {
     if (o == this) return true;
     if (!(o instanceof HomePositionValueObject that)) return false;
-    return this.x == that.x && this.y == that.y && this.z == that.z;
+    return this.world.getName().equals(that.world.getName()) &&
+      this.x == that.x &&
+      this.y == that.y &&
+      this.z == that.z;
   }
 }
