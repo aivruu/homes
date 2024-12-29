@@ -37,9 +37,7 @@ public final class PlayerRegistryListener implements Listener {
 
   @EventHandler
   public void onAsyncPreLogin(final @NotNull AsyncPlayerPreLoginEvent event) {
-    if (!this.playerManagerService.loadOne(event.getUniqueId().toString())) {
-      this.logger.error(Component.text("Couldn't load this player's information.").color(NamedTextColor.YELLOW));
-    }
+    this.playerManagerService.loadOne(event.getUniqueId().toString());
   }
 
   @EventHandler
