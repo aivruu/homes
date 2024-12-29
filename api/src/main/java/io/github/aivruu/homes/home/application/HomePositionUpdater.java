@@ -37,6 +37,12 @@ import org.jetbrains.annotations.Nullable;
 public final class HomePositionUpdater {
   private final AggregateRootRegistry<PlayerAggregateRoot> playerAggregateRootRegistry;
 
+  /**
+   * Creates a new {@link HomePositionUpdater} with the provided parameters.
+   *
+   * @param playerAggregateRootRegistry the {@link io.github.aivruu.homes.player.application.registry.PlayerAggregateRootRegistry}.
+   * @since 2.0.0
+   */
   public HomePositionUpdater(final @NotNull AggregateRootRegistry<PlayerAggregateRoot> playerAggregateRootRegistry) {
     this.playerAggregateRootRegistry = playerAggregateRootRegistry;
   }
