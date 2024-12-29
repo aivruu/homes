@@ -78,7 +78,6 @@ public final class PlayerHomeController {
     final HomeModelEntity[] newHomes = new HomeModelEntity[homes.length + 1];
     byte i = 0;
     for (; i < homes.length; i++) {
-      if (homes[i].id().equals(homeModel.id())) return false;
       newHomes[i] = homes[i];
     }
     newHomes[i] = homeModel;
