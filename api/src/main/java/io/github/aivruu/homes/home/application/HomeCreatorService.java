@@ -36,6 +36,13 @@ public final class HomeCreatorService {
   private final AggregateRootRegistry<PlayerAggregateRoot> playerAggregateRootRegistry;
   private final PlayerHomeController playerHomeController;
 
+  /**
+   * Creates a new {@link HomeCreatorService} with the provided parameters.
+   *
+   * @param playerAggregateRootRegistry the {@link io.github.aivruu.homes.player.application.registry.PlayerAggregateRootRegistry}.
+   * @param playerHomeController the {@link PlayerHomeController}.
+   * @since 2.0.0
+   */
   public HomeCreatorService(final @NotNull AggregateRootRegistry<PlayerAggregateRoot> playerAggregateRootRegistry, final @NotNull PlayerHomeController playerHomeController) {
     this.playerAggregateRootRegistry = playerAggregateRootRegistry;
     this.playerHomeController = playerHomeController;
