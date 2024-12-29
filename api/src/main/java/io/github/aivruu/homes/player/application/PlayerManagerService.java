@@ -60,22 +60,27 @@ public final class PlayerManagerService {
    * Loads the specified player's information.
    *
    * @param id the player's id.
-   * @return Whether the information was loaded correctly.
    * @see io.github.aivruu.homes.player.application.registry.PlayerAggregateRootRegistry#findInInfrastructure(String)
    * @since 2.0.0
    */
-  public boolean loadOne(final @NotNull String id) {
+  public void loadOne(final @NotNull String id) {
     PlayerAggregateRoot playerAggregateRoot = this.playerAggregateRootRegistry.findInInfrastructure(id);
     if (playerAggregateRoot != null) {
       this.playerAggregateRootRegistry.register(playerAggregateRoot);
-      return true;
+      return;
     }
     playerAggregateRoot = new PlayerAggregateRoot(new PlayerModelEntity(id, new HomeModelEntity[0]));
     this.playerAggregateRootRegistry.register(playerAggregateRoot);
     this.handleAggregateRootSave(playerAggregateRoot);
-    return true;
   }
 
+  /**
+   * Saves the given {@link PlayerAggregateRoot} into infrastructure, and handles the
+   * returned {@link java.util.concurrent.CompletableFuture} for information logging.
+   *
+   * @param playerAggregateRoot a {@link PlayerAggregateRoot}.
+   * @since 2.0.0
+   */
   public void handleAggregateRootSave(final @NotNull PlayerAggregateRoot playerAggregateRoot) {
     this.playerAggregateRootRegistry.save(playerAggregateRoot)
       .thenAccept(wasSaved -> {
